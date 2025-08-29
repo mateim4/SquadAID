@@ -1,0 +1,8 @@
+/*
+  Ensures the React Flow canvas and its container
+  fill the entire available space within the parent layout.
+*/
+.builder-page-container {
+  width: 100%;
+  height: 100%;
+}
