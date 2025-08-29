@@ -56,20 +56,55 @@ const Palette = () => {
 
   return (
     <aside className={styles.palette}>
-      <Title3>Node Palette</Title3>
+      <Title3>TeamAID Agents</Title3>
+      <div
+        className={styles.paletteItem}
+        onDragStart={(event) => onDragStart(event, 'claudeAgent')}
+        draggable
+      >
+        🧠 Claude Agent
+      </div>
+      <div
+        className={styles.paletteItem}
+        onDragStart={(event) => onDragStart(event, 'qwenAgent')}
+        draggable
+      >
+        ⚡ Qwen QA Agent
+      </div>
+      <div
+        className={styles.paletteItem}
+        onDragStart={(event) => onDragStart(event, 'julesAgent')}
+        draggable
+      >
+        🔍 Jules Research Agent
+      </div>
+      <div
+        className={styles.paletteItem}
+        onDragStart={(event) => onDragStart(event, 'copilotAgent')}
+        draggable
+      >
+        🚀 GitHub Copilot Agent
+      </div>
+      <div
+        className={styles.paletteItem}
+        onDragStart={(event) => onDragStart(event, 'customAgent')}
+        draggable
+      >
+        🔧 Custom Agent
+      </div>
       <div
         className={styles.paletteItem}
         onDragStart={(event) => onDragStart(event, 'assistantAgent')}
         draggable
       >
-        Assistant Agent
+        🤖 Assistant Agent
       </div>
       <div
         className={styles.paletteItem}
         onDragStart={(event) => onDragStart(event, 'userProxyAgent')}
         draggable
       >
-        User Proxy Agent
+        👤 User Proxy Agent
       </div>
     </aside>
   );

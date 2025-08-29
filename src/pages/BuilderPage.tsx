@@ -13,6 +13,11 @@ import { v4 as uuidv4 } from 'uuid';
 import useFlowStore, { FlowState } from '../store/flow';
 import AssistantAgentNode from '../components/nodes/AssistantAgentNode';
 import UserProxyAgentNode from '../components/nodes/UserProxyAgentNode';
+import ClaudeAgentNode from '../components/nodes/ClaudeAgentNode';
+import QwenAgentNode from '../components/nodes/QwenAgentNode';
+import JulesAgentNode from '../components/nodes/JulesAgentNode';
+import CopilotAgentNode from '../components/nodes/CopilotAgentNode';
+import CustomAgentNode from '../components/nodes/CustomAgentNode';
 import Palette from '../components/Palette'; // Import the new Palette component
 
 import 'reactflow/dist/style.css';
@@ -41,6 +46,11 @@ const BuilderPageContent = memo(() => {
     () => ({
       assistantAgent: AssistantAgentNode,
       userProxyAgent: UserProxyAgentNode,
+      claudeAgent: ClaudeAgentNode,
+      qwenAgent: QwenAgentNode,
+      julesAgent: JulesAgentNode,
+      copilotAgent: CopilotAgentNode,
+      customAgent: CustomAgentNode,
     }),
     []
   );
@@ -83,14 +93,74 @@ const BuilderPageContent = memo(() => {
       y: event.clientY,
     });
 
+    // Define default data for each agent type
+    const getDefaultData = (type: string) => {
+      switch (type) {
+        case 'claudeAgent':
+          return {
+            name: 'Claude Assistant',
+            role: 'Assistant',
+            description: 'Advanced reasoning and code generation',
+            systemPrompt: 'You are a helpful AI assistant with advanced reasoning capabilities...',
+            temperature: 0.7,
+            capabilities: ['reasoning', 'coding', 'analysis', 'writing']
+          };
+        case 'qwenAgent':
+          return {
+            name: 'Qwen QA Agent',
+            role: 'Code Specialist',
+            description: 'Specialized in code analysis, review, and quality assurance',
+            systemPrompt: 'You are a comprehensive QA agent focused on code quality, security, and best practices...',
+            temperature: 0.5,
+            capabilities: ['coding', 'debugging', 'code-review', 'security-analysis'],
+            qualityThreshold: 7
+          };
+        case 'julesAgent':
+          return {
+            name: 'Jules Research Agent',
+            role: 'Research Assistant',
+            description: 'Google-powered research and comprehensive analysis',
+            systemPrompt: 'You are a research agent with access to web search and comprehensive analysis capabilities...',
+            capabilities: ['research', 'web-search', 'analysis', 'multi-file-implementation'],
+            secureVmEnabled: true,
+            multiFileCapable: true
+          };
+        case 'copilotAgent':
+          return {
+            name: 'GitHub Copilot Agent',
+            role: 'Code Assistant',
+            description: 'GitHub-integrated coding assistant with PR management',
+            systemPrompt: 'You are a GitHub Copilot integration agent responsible for code completion and PR management...',
+            capabilities: ['coding', 'github-integration', 'code-completion', 'pr-creation'],
+            githubIntegration: true,
+            autoAssignment: false,
+            prAnalysis: true
+          };
+        case 'customAgent':
+          return {
+            name: 'Custom Agent',
+            role: 'Specialist Agent',
+            description: 'Custom agent with configurable capabilities and tools',
+            systemPrompt: 'Define your custom agent\'s behavior and responsibilities...',
+            temperature: 0.7,
+            capabilities: ['custom-logic', 'flexible-processing'],
+            tools: ['create_file', 'read_file', 'execute_bash', 'list_directory'],
+            workflow: 'sequential'
+          };
+        case 'assistantAgent':
+          return { name: 'New Agent', systemMessage: 'You are a helpful assistant.' };
+        case 'userProxyAgent':
+          return { name: 'New User Proxy' };
+        default:
+          return { name: 'Unknown Agent' };
+      }
+    };
+
     const newNode = {
       id: uuidv4(),
       type,
       position,
-      data:
-        type === 'assistantAgent'
-          ? { name: 'New Agent', systemMessage: 'You are a helpful assistant.' }
-          : { name: 'New User Proxy' },
+      data: getDefaultData(type),
     };
 
     addNode(newNode);

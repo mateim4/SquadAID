@@ -14,7 +14,20 @@
       "Bash(sudo /usr/bin/dnf install nodejs npm gh -y)",
       "Read(/usr/bin/**)",
       "Bash(bash:*)",
-      "Bash(flatpak-spawn:*)"
+      "Bash(flatpak-spawn:*)",
+      "Read(/home/mateim/**)",
+      "Read(/home/mateim/**)",
+      "Read(/home/mateim/DevApps/TeamAID/**)",
+      "Read(/home/mateim/DevApps/TeamAID/**)",
+      "Read(/home/mateim/DevApps/TeamAID/**)",
+      "Read(/home/mateim/DevApps/TeamAID/**)",
+      "Read(/home/mateim/DevApps/TeamAID/**)",
+      "Read(/home/mateim/DevApps/TeamAID/**)",
+      "Read(/home/mateim/DevApps/TeamAID/**)",
+      "Read(/home/mateim/DevApps/TeamAID/fluent_frontend/src/types/**)",
+      "Read(/home/mateim/DevApps/TeamAID/fluent_frontend/src/pages/**)",
+      "Read(/home/mateim/DevApps/TeamAID/**)",
+      "Read(/home/mateim/DevApps/TeamAID/**)"
     ],
     "deny": [],
     "ask": []

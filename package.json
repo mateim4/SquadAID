@@ -18,12 +18,14 @@
     "react-router-dom": "^6.23.1",
     "reactflow": "^11.11.4",
     "use-debounce": "^10.0.5",
+    "uuid": "^11.1.0",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.11",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
+    "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.2.1",
     "typescript": "^5.0.2",
     "vite": "^5.0.0"
