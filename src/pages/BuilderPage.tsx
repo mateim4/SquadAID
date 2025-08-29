@@ -11,10 +11,10 @@ import { invoke } from '@tauri-apps/api/tauri';
 import { v4 as uuidv4 } from 'uuid';
 
 import useFlowStore, { FlowState } from '../store/flow';
-import AssistantAgentNode from '../components/nodes/AssistantAgentNode';
 import UserProxyAgentNode from '../components/nodes/UserProxyAgentNode';
 import ClaudeAgentNode from '../components/nodes/ClaudeAgentNode';
-import QwenAgentNode from '../components/nodes/QwenAgentNode';
+import LocalOllamaAgentNode from '../components/nodes/LocalOllamaAgentNode';
+import LocalMSTYAgentNode from '../components/nodes/LocalMSTYAgentNode';
 import JulesAgentNode from '../components/nodes/JulesAgentNode';
 import CopilotAgentNode from '../components/nodes/CopilotAgentNode';
 import CustomAgentNode from '../components/nodes/CustomAgentNode';
@@ -44,10 +44,10 @@ const BuilderPageContent = memo(() => {
   const debouncedSave = useDebouncedCallback(saveFlow, 1000);
   const nodeTypes = useMemo(
     () => ({
-      assistantAgent: AssistantAgentNode,
       userProxyAgent: UserProxyAgentNode,
       claudeAgent: ClaudeAgentNode,
-      qwenAgent: QwenAgentNode,
+      localOllamaAgent: LocalOllamaAgentNode,
+      localMSTYAgent: LocalMSTYAgentNode,
       julesAgent: JulesAgentNode,
       copilotAgent: CopilotAgentNode,
       customAgent: CustomAgentNode,
@@ -105,23 +105,37 @@ const BuilderPageContent = memo(() => {
             temperature: 0.7,
             capabilities: ['reasoning', 'coding', 'analysis', 'writing']
           };
-        case 'qwenAgent':
+        case 'localOllamaAgent':
           return {
-            name: 'Qwen QA Agent',
-            role: 'Code Specialist',
-            description: 'Specialized in code analysis, review, and quality assurance',
-            systemPrompt: 'You are a comprehensive QA agent focused on code quality, security, and best practices...',
-            temperature: 0.5,
-            capabilities: ['coding', 'debugging', 'code-review', 'security-analysis'],
-            qualityThreshold: 7
+            name: 'Local Ollama Agent',
+            role: 'Local AI Assistant',
+            description: 'Local AI agent powered by Ollama models',
+            systemPrompt: 'You are a local AI assistant running on Ollama...',
+            temperature: 0.7,
+            capabilities: ['local-ai', 'offline-processing', 'privacy-focused', 'customizable'],
+            modelName: 'qwen2.5-coder:32b',
+            ollamaEndpoint: 'http://localhost:11434'
+          };
+        case 'localMSTYAgent':
+          return {
+            name: 'Local MSTY Agent',
+            role: 'High-Performance Local AI',
+            description: 'High-performance local AI agent powered by MSTY',
+            systemPrompt: 'You are a high-performance local AI assistant with access to long context...',
+            temperature: 0.7,
+            capabilities: ['local-inference', 'high-performance', 'long-context', 'streaming'],
+            mstyEndpoint: 'http://localhost:10000',
+            modelName: 'llama-3.1-70b',
+            contextLength: 32,
+            streamingEnabled: true
           };
         case 'julesAgent':
           return {
-            name: 'Jules Research Agent',
-            role: 'Research Assistant',
-            description: 'Google-powered research and comprehensive analysis',
-            systemPrompt: 'You are a research agent with access to web search and comprehensive analysis capabilities...',
-            capabilities: ['research', 'web-search', 'analysis', 'multi-file-implementation'],
+            name: 'Jules Coding Agent',
+            role: 'Async Coding Assistant',
+            description: 'Google-powered async coding agent with comprehensive implementation capabilities',
+            systemPrompt: 'You are an async coding agent that can implement comprehensive multi-file solutions...',
+            capabilities: ['async-coding', 'multi-file-implementation', 'comprehensive-solutions', 'github-integration'],
             secureVmEnabled: true,
             multiFileCapable: true
           };
@@ -147,8 +161,6 @@ const BuilderPageContent = memo(() => {
             tools: ['create_file', 'read_file', 'execute_bash', 'list_directory'],
             workflow: 'sequential'
           };
-        case 'assistantAgent':
-          return { name: 'New Agent', systemMessage: 'You are a helpful assistant.' };
         case 'userProxyAgent':
           return { name: 'New User Proxy' };
         default:

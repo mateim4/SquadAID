@@ -66,17 +66,24 @@ const Palette = () => {
       </div>
       <div
         className={styles.paletteItem}
-        onDragStart={(event) => onDragStart(event, 'qwenAgent')}
+        onDragStart={(event) => onDragStart(event, 'localOllamaAgent')}
         draggable
       >
-        ⚡ Qwen QA Agent
+        🖥️ Local Ollama Agent
+      </div>
+      <div
+        className={styles.paletteItem}
+        onDragStart={(event) => onDragStart(event, 'localMSTYAgent')}
+        draggable
+      >
+        ⚡ Local MSTY Agent
       </div>
       <div
         className={styles.paletteItem}
         onDragStart={(event) => onDragStart(event, 'julesAgent')}
         draggable
       >
-        🔍 Jules Research Agent
+        🔍 Jules Coding Agent
       </div>
       <div
         className={styles.paletteItem}
@@ -91,13 +98,6 @@ const Palette = () => {
         draggable
       >
         🔧 Custom Agent
-      </div>
-      <div
-        className={styles.paletteItem}
-        onDragStart={(event) => onDragStart(event, 'assistantAgent')}
-        draggable
-      >
-        🤖 Assistant Agent
       </div>
       <div
         className={styles.paletteItem}

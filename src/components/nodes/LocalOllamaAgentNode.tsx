@@ -53,17 +53,18 @@ const useStyles = makeStyles({
   },
 });
 
-interface QwenAgentNodeData {
+interface LocalOllamaAgentNodeData {
   name: string;
   role: string;
   description: string;
   systemPrompt: string;
   temperature: number;
   capabilities: string[];
-  qualityThreshold: number;
+  modelName: string;
+  ollamaEndpoint: string;
 }
 
-const QwenAgentNode = memo(({ id, data }: NodeProps<QwenAgentNodeData>) => {
+const LocalOllamaAgentNode = memo(({ id, data }: NodeProps<LocalOllamaAgentNodeData>) => {
   const styles = useStyles();
 
   const { 
@@ -73,10 +74,11 @@ const QwenAgentNode = memo(({ id, data }: NodeProps<QwenAgentNodeData>) => {
     systemPrompt, 
     temperature,
     capabilities,
-    qualityThreshold 
+    modelName,
+    ollamaEndpoint
   } = data;
 
-  const defaultCapabilities = ["coding", "debugging", "code-review", "security-analysis"];
+  const defaultCapabilities = ["local-ai", "offline-processing", "privacy-focused", "customizable"];
 
   return (
     <Card className={styles.card}>
@@ -87,7 +89,7 @@ const QwenAgentNode = memo(({ id, data }: NodeProps<QwenAgentNodeData>) => {
       />
       <CardHeader
         className={styles.cardHeader}
-        header={<b>⚡ Qwen QA Agent</b>}
+        header={<b>🖥️ Local Ollama Agent</b>}
       />
       <div className={styles.cardContent}>
         <Label htmlFor={`name-${id}`}>Name</Label>
@@ -95,7 +97,7 @@ const QwenAgentNode = memo(({ id, data }: NodeProps<QwenAgentNodeData>) => {
           id={`name-${id}`}
           defaultValue={name}
           className={styles.nodrag}
-          placeholder="e.g., Qwen QA Agent"
+          placeholder="e.g., Local Coding Agent"
         />
 
         <Label htmlFor={`role-${id}`}>Role</Label>
@@ -103,7 +105,7 @@ const QwenAgentNode = memo(({ id, data }: NodeProps<QwenAgentNodeData>) => {
           id={`role-${id}`}
           defaultValue={role}
           className={styles.nodrag}
-          placeholder="e.g., Code Specialist"
+          placeholder="e.g., Local AI Assistant"
         />
 
         <Label htmlFor={`description-${id}`}>Description</Label>
@@ -111,9 +113,25 @@ const QwenAgentNode = memo(({ id, data }: NodeProps<QwenAgentNodeData>) => {
           id={`description-${id}`}
           defaultValue={description}
           className={styles.nodrag}
-          placeholder="Specialized in code analysis, review, and quality assurance"
+          placeholder="Local AI agent powered by Ollama models"
           rows={2}
           resize="vertical"
+        />
+
+        <Label htmlFor={`model-name-${id}`}>Ollama Model</Label>
+        <Input
+          id={`model-name-${id}`}
+          defaultValue={modelName}
+          className={styles.nodrag}
+          placeholder="e.g., qwen2.5-coder:32b"
+        />
+
+        <Label htmlFor={`ollama-endpoint-${id}`}>Ollama Endpoint</Label>
+        <Input
+          id={`ollama-endpoint-${id}`}
+          defaultValue={ollamaEndpoint}
+          className={styles.nodrag}
+          placeholder="e.g., http://localhost:11434"
         />
 
         <Label htmlFor={`system-prompt-${id}`}>System Prompt</Label>
@@ -136,18 +154,6 @@ const QwenAgentNode = memo(({ id, data }: NodeProps<QwenAgentNodeData>) => {
           className={styles.nodrag}
         />
 
-        <div className={styles.qualitySection}>
-          <Label htmlFor={`quality-threshold-${id}`}>Quality Threshold: {qualityThreshold}/10</Label>
-          <Slider
-            id={`quality-threshold-${id}`}
-            defaultValue={qualityThreshold}
-            min={1}
-            max={10}
-            step={1}
-            className={styles.nodrag}
-          />
-        </div>
-
         <Label>Capabilities</Label>
         <div className={styles.capabilityChips}>
           {(capabilities || defaultCapabilities).map((capability) => (
@@ -166,4 +172,4 @@ const QwenAgentNode = memo(({ id, data }: NodeProps<QwenAgentNodeData>) => {
   );
 });
 
-export default QwenAgentNode;
+export default LocalOllamaAgentNode;

@@ -9,16 +9,17 @@ import {
   shorthands,
   tokens,
   Label,
+  Slider,
   Switch,
 } from '@fluentui/react-components';
 
 const useStyles = makeStyles({
   card: {
     width: '320px',
-    ...shorthands.border('1px', 'solid', tokens.colorPaletteGreenBorder1),
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteTealBorder1),
   },
   cardHeader: {
-    backgroundColor: tokens.colorPaletteGreenBorder2,
+    backgroundColor: tokens.colorPaletteTealBorder2,
     color: tokens.colorNeutralForegroundOnBrand,
   },
   cardContent: {
@@ -45,11 +46,11 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.borderRadius(tokens.borderRadiusSmall),
   },
-  vmSection: {
-    ...shorthands.border('1px', 'solid', tokens.colorPaletteGreenBorder1),
+  mstySection: {
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteTealBorder1),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.padding(tokens.spacingVerticalS),
-    backgroundColor: tokens.colorPaletteGreenBackground1,
+    backgroundColor: tokens.colorPaletteTealBackground1,
   },
   switchContainer: {
     display: 'flex',
@@ -58,17 +59,20 @@ const useStyles = makeStyles({
   },
 });
 
-interface JulesAgentNodeData {
+interface LocalMSTYAgentNodeData {
   name: string;
   role: string;
   description: string;
   systemPrompt: string;
+  temperature: number;
   capabilities: string[];
-  secureVmEnabled: boolean;
-  multiFileCapable: boolean;
+  mstyEndpoint: string;
+  modelName: string;
+  contextLength: number;
+  streamingEnabled: boolean;
 }
 
-const JulesAgentNode = memo(({ id, data }: NodeProps<JulesAgentNodeData>) => {
+const LocalMSTYAgentNode = memo(({ id, data }: NodeProps<LocalMSTYAgentNodeData>) => {
   const styles = useStyles();
 
   const { 
@@ -76,12 +80,15 @@ const JulesAgentNode = memo(({ id, data }: NodeProps<JulesAgentNodeData>) => {
     role, 
     description, 
     systemPrompt, 
+    temperature,
     capabilities,
-    secureVmEnabled,
-    multiFileCapable
+    mstyEndpoint,
+    modelName,
+    contextLength,
+    streamingEnabled
   } = data;
 
-  const defaultCapabilities = ["async-coding", "multi-file-implementation", "comprehensive-solutions", "github-integration"];
+  const defaultCapabilities = ["local-inference", "high-performance", "long-context", "streaming"];
 
   return (
     <Card className={styles.card}>
@@ -92,7 +99,7 @@ const JulesAgentNode = memo(({ id, data }: NodeProps<JulesAgentNodeData>) => {
       />
       <CardHeader
         className={styles.cardHeader}
-        header={<b>🔍 Jules Coding Agent</b>}
+        header={<b>⚡ Local MSTY Agent</b>}
       />
       <div className={styles.cardContent}>
         <Label htmlFor={`name-${id}`}>Name</Label>
@@ -100,7 +107,7 @@ const JulesAgentNode = memo(({ id, data }: NodeProps<JulesAgentNodeData>) => {
           id={`name-${id}`}
           defaultValue={name}
           className={styles.nodrag}
-          placeholder="e.g., Jules Coding Agent"
+          placeholder="e.g., Local MSTY Assistant"
         />
 
         <Label htmlFor={`role-${id}`}>Role</Label>
@@ -108,7 +115,7 @@ const JulesAgentNode = memo(({ id, data }: NodeProps<JulesAgentNodeData>) => {
           id={`role-${id}`}
           defaultValue={role}
           className={styles.nodrag}
-          placeholder="e.g., Async Coding Assistant"
+          placeholder="e.g., High-Performance Local AI"
         />
 
         <Label htmlFor={`description-${id}`}>Description</Label>
@@ -116,38 +123,66 @@ const JulesAgentNode = memo(({ id, data }: NodeProps<JulesAgentNodeData>) => {
           id={`description-${id}`}
           defaultValue={description}
           className={styles.nodrag}
-          placeholder="Google-powered async coding agent with comprehensive implementation capabilities"
+          placeholder="High-performance local AI agent powered by MSTY"
           rows={2}
           resize="vertical"
         />
+
+        <div className={styles.mstySection}>
+          <Label htmlFor={`msty-endpoint-${id}`}>MSTY Endpoint</Label>
+          <Input
+            id={`msty-endpoint-${id}`}
+            defaultValue={mstyEndpoint}
+            className={styles.nodrag}
+            placeholder="e.g., http://localhost:10000"
+          />
+
+          <Label htmlFor={`model-name-${id}`}>Model Name</Label>
+          <Input
+            id={`model-name-${id}`}
+            defaultValue={modelName}
+            className={styles.nodrag}
+            placeholder="e.g., llama-3.1-70b"
+          />
+
+          <Label htmlFor={`context-length-${id}`}>Context Length: {contextLength}k</Label>
+          <Slider
+            id={`context-length-${id}`}
+            defaultValue={contextLength}
+            min={4}
+            max={128}
+            step={4}
+            className={styles.nodrag}
+          />
+
+          <div className={styles.switchContainer}>
+            <Switch 
+              defaultChecked={streamingEnabled}
+              className={styles.nodrag}
+            />
+            <Label>Streaming Response</Label>
+          </div>
+        </div>
 
         <Label htmlFor={`system-prompt-${id}`}>System Prompt</Label>
         <Textarea
           id={`system-prompt-${id}`}
           defaultValue={systemPrompt}
           className={styles.nodrag}
-          placeholder="You are an async coding agent that can implement comprehensive multi-file solutions..."
+          placeholder="You are a high-performance local AI assistant with access to long context..."
           rows={3}
           resize="vertical"
         />
 
-        <div className={styles.vmSection}>
-          <div className={styles.switchContainer}>
-            <Switch 
-              defaultChecked={secureVmEnabled}
-              className={styles.nodrag}
-            />
-            <Label>Secure Google Cloud VM</Label>
-          </div>
-          
-          <div className={styles.switchContainer}>
-            <Switch 
-              defaultChecked={multiFileCapable}
-              className={styles.nodrag}
-            />
-            <Label>Multi-file Implementation</Label>
-          </div>
-        </div>
+        <Label htmlFor={`temperature-${id}`}>Temperature: {temperature}</Label>
+        <Slider
+          id={`temperature-${id}`}
+          defaultValue={temperature}
+          min={0}
+          max={1}
+          step={0.1}
+          className={styles.nodrag}
+        />
 
         <Label>Capabilities</Label>
         <div className={styles.capabilityChips}>
@@ -167,4 +202,4 @@ const JulesAgentNode = memo(({ id, data }: NodeProps<JulesAgentNodeData>) => {
   );
 });
 
-export default JulesAgentNode;
+export default LocalMSTYAgentNode;
