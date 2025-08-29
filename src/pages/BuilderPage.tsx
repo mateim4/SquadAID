@@ -137,7 +137,17 @@ const BuilderPageContent = memo(() => {
         fitView
       >
         <Controls />
-        <MiniMap />
+        <MiniMap 
+          nodeColor="#3b82f6"
+          nodeStrokeWidth={3}
+          position="bottom-right"
+          style={{
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            overflow: 'hidden'
+          }}
+        />
         <Background gap={12} size={1} />
       </ReactFlow>
     </div>

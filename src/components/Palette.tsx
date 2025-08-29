@@ -14,8 +14,8 @@ import {
   CodeBlock24Regular,
   Cloud24Regular,
   Laptop24Regular,
-  RocketLaunch24Regular,
-  GitFork24Regular,
+  Rocket24Regular,
+  Branch24Regular,
   Wrench24Regular,
 } from '@fluentui/react-icons';
 
@@ -139,7 +139,7 @@ const agentItems: AgentItem[] = [
     type: 'localMSTYAgent',
     title: 'Local MSTY',
     description: 'High-performance local inference',
-    icon: <RocketLaunch24Regular />,
+    icon: <Rocket24Regular />,
     color: tokens.colorPalettePurpleBackground,
   },
   {
@@ -153,7 +153,7 @@ const agentItems: AgentItem[] = [
     type: 'copilotAgent',
     title: 'GitHub Copilot',
     description: 'Code completion and PR management',
-    icon: <GitFork24Regular />,
+    icon: <Branch24Regular />,
     color: tokens.colorPaletteYellowBackground,
   },
   {

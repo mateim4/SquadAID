@@ -71,12 +71,8 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
-    transition: 'all 0.2s ease',
     '&:focus': {
-      borderTopColor: tokens.colorBrandStroke1,
-      borderRightColor: tokens.colorBrandStroke1,
-      borderBottomColor: tokens.colorBrandStroke1,
-      borderLeftColor: tokens.colorBrandStroke1,
+      ...shorthands.border("1px", "solid", tokens.colorBrandStroke1),
       boxShadow: `0 0 0 2px ${tokens.colorBrandStroke1}20`,
     },
   },
@@ -96,9 +92,8 @@ const useStyles = makeStyles({
     borderRadius: '50%',
     border: `2px solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground1,
-    transition: 'all 0.2s ease',
     '&:hover': {
-      transform: 'scale(1.3)',
+      
       boxShadow: `0 0 0 3px ${tokens.colorNeutralStroke2}40`,
     },
   },
