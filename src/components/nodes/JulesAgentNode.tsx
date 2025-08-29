@@ -74,7 +74,10 @@ const useStyles = makeStyles({
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
     transition: 'all 0.2s ease',
     '&:focus': {
-      borderColor: tokens.colorBrandStroke1,
+      borderTopColor: tokens.colorBrandStroke1,
+      borderRightColor: tokens.colorBrandStroke1,
+      borderBottomColor: tokens.colorBrandStroke1,
+      borderLeftColor: tokens.colorBrandStroke1,
       boxShadow: `0 0 0 2px ${tokens.colorBrandStroke1}20`,
     },
   },
@@ -85,7 +88,10 @@ const useStyles = makeStyles({
     transition: 'all 0.2s ease',
     fontFamily: 'ui-monospace, "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", monospace',
     '&:focus': {
-      borderColor: tokens.colorBrandStroke1,
+      borderTopColor: tokens.colorBrandStroke1,
+      borderRightColor: tokens.colorBrandStroke1,
+      borderBottomColor: tokens.colorBrandStroke1,
+      borderLeftColor: tokens.colorBrandStroke1,
       boxShadow: `0 0 0 2px ${tokens.colorBrandStroke1}20`,
     },
   },

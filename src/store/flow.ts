@@ -86,10 +86,22 @@ const useFlowStore = create<FlowState>((set, get) => ({
   saveFlow: () => {
     const { nodes, edges, viewport } = get();
     const graphState = { nodes, edges, viewport };
-    invoke('save_workflow', {
-      id: 1,
-      graphStateJson: JSON.stringify(graphState),
-    }).catch(console.error);
+    
+    // Check if we're running in Tauri (desktop) or web mode
+    if (typeof window !== 'undefined' && window.__TAURI_IPC__) {
+      invoke('save_workflow', {
+        id: 1,
+        graphStateJson: JSON.stringify(graphState),
+      }).catch(console.error);
+    } else {
+      // In web mode, save to localStorage as fallback
+      try {
+        localStorage.setItem('workflow_backup', JSON.stringify(graphState));
+        console.log('Workflow saved to localStorage (web dev mode)');
+      } catch (err) {
+        console.warn('Could not save to localStorage:', err);
+      }
+    }
   },
 }));
 

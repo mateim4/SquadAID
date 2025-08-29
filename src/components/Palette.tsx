@@ -4,22 +4,34 @@ import {
   shorthands,
   tokens,
   Title3,
+  Caption1,
+  Card,
+  CardHeader,
 } from '@fluentui/react-components';
+import {
+  Bot24Regular,
+  PersonCircle24Regular,
+  CodeBlock24Regular,
+  Cloud24Regular,
+  Laptop24Regular,
+  RocketLaunch24Regular,
+  GitFork24Regular,
+  Wrench24Regular,
+} from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   palette: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap(tokens.spacingVerticalS),
-    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalM),
-    ...shorthands.borderRight('1px', 'solid', tokens.colorNeutralStroke1),
-    width: '280px',
+    ...shorthands.gap(tokens.spacingVerticalM),
+    ...shorthands.padding(tokens.spacingVerticalXL, tokens.spacingHorizontalL),
+    width: '320px',
     backgroundColor: tokens.colorNeutralBackground2,
-    backdropFilter: 'blur(20px) saturate(180%)',
-    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-    boxShadow: 'inset -1px 0 0 rgba(255, 255, 255, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+    ...shorthands.borderRight('1px', 'solid', tokens.colorNeutralStroke2),
+    backdropFilter: 'blur(20px)',
     position: 'relative',
-    zIndex: 50,
+    zIndex: 10,
+    boxShadow: tokens.shadow8,
     overflowY: 'auto',
     scrollbarWidth: 'thin',
     scrollbarColor: `${tokens.colorNeutralStroke2} transparent`,
@@ -31,175 +43,176 @@ const useStyles = makeStyles({
     },
     '&::-webkit-scrollbar-thumb': {
       backgroundColor: tokens.colorNeutralStroke2,
-      borderRadius: '3px',
+      ...shorthands.borderRadius(tokens.borderRadiusSmall),
       '&:hover': {
         backgroundColor: tokens.colorNeutralStroke1,
       },
     },
-    '@media (max-width: 1200px)': {
-      width: '100%',
-      height: '120px',
-      flexDirection: 'row',
-      overflowX: 'auto',
-      overflowY: 'hidden',
-      ...shorthands.borderRight('none'),
-      ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke1),
-      ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalL),
-    },
-    '@media (max-width: 768px)': {
-      height: '100px',
-      ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
-    },
+  },
+  header: {
+    ...shorthands.margin('0', '0', tokens.spacingVerticalL, '0'),
   },
   title: {
-    marginBottom: tokens.spacingVerticalM,
+    color: tokens.colorNeutralForeground1,
+    fontWeight: tokens.fontWeightSemibold,
+    fontSize: tokens.fontSizeBase500,
+    lineHeight: tokens.lineHeightBase500,
+  },
+  subtitle: {
+    color: tokens.colorNeutralForeground3,
+    ...shorthands.margin(tokens.spacingVerticalXS, '0', '0', '0'),
+  },
+  agentGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap(tokens.spacingVerticalS),
+  },
+  agentCard: {
+    cursor: 'grab',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
+    backgroundColor: tokens.colorNeutralBackground1,
+    '&:hover': {
+      backgroundColor: tokens.colorNeutralBackground1Hover,
+      ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+      boxShadow: tokens.shadow4,
+      transform: 'translateY(-1px)',
+    },
+    '&:active': {
+      transform: 'scale(0.98)',
+      cursor: 'grabbing',
+    },
+  },
+  agentHeader: {
+    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalM),
+  },
+  agentIcon: {
+    color: tokens.colorBrandForeground1,
+    fontSize: '20px',
+  },
+  agentTitle: {
     color: tokens.colorNeutralForeground1,
     fontWeight: tokens.fontWeightSemibold,
     fontSize: tokens.fontSizeBase300,
-    textAlign: 'center',
-    '@media (max-width: 1200px)': {
-      marginBottom: tokens.spacingVerticalS,
-      marginRight: tokens.spacingHorizontalM,
-      fontSize: tokens.fontSizeBase200,
-      whiteSpace: 'nowrap',
-      flexShrink: 0,
-    },
-    '@media (max-width: 768px)': {
-      fontSize: tokens.fontSizeBase100,
-      marginRight: tokens.spacingHorizontalS,
-    },
+    lineHeight: tokens.lineHeightBase300,
+    ...shorthands.margin('0'),
   },
-  paletteItem: {
-    cursor: 'grab',
-    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalM),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
-    backgroundColor: tokens.colorNeutralBackground1,
-    textAlign: 'center',
+  agentDescription: {
+    color: tokens.colorNeutralForeground3,
     fontSize: tokens.fontSizeBase200,
-    fontWeight: tokens.fontWeightMedium,
-    color: tokens.colorNeutralForeground1,
-    position: 'relative',
-    overflow: 'hidden',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-    whiteSpace: 'nowrap',
-    minWidth: '180px',
-    '@media (max-width: 1200px)': {
-      minWidth: '160px',
-      flexShrink: 0,
-      ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalS),
-    },
-    '@media (max-width: 768px)': {
-      minWidth: '140px',
-      fontSize: tokens.fontSizeBase100,
-      ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalXS),
-    },
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: '0',
-      left: '-100%',
-      width: '100%',
-      height: '100%',
-      background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)',
-      transition: 'left 0.5s ease',
-    },
-    '&:hover': {
-      backgroundColor: tokens.colorNeutralBackground1Hover,
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-      transform: 'translateY(-2px) scale(1.02)',
-      borderColor: tokens.colorNeutralStroke1,
-      '&::before': {
-        left: '100%',
-      },
-    },
-    '&:active': {
-      transform: 'translateY(0) scale(0.98)',
-      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
-      cursor: 'grabbing',
-    },
-    '&:focus-visible': {
-      outline: `2px solid ${tokens.colorBrandStroke1}`,
-      outlineOffset: '2px',
-    },
-  },
-  paletteItemDragging: {
-    opacity: 0.7,
-    transform: 'rotate(5deg) scale(1.05)',
-    boxShadow: '0 12px 48px rgba(0, 0, 0, 0.2)',
-    zIndex: 1000,
-    cursor: 'grabbing',
+    lineHeight: tokens.lineHeightBase200,
+    ...shorthands.margin(tokens.spacingVerticalXS, '0', '0', '0'),
   },
 });
 
+interface AgentItem {
+  type: string;
+  title: string;
+  description: string;
+  icon: React.ReactElement;
+  color: string;
+}
+
+const agentItems: AgentItem[] = [
+  {
+    type: 'userProxyAgent',
+    title: 'User Proxy',
+    description: 'Human interface agent for manual oversight',
+    icon: <PersonCircle24Regular />,
+    color: tokens.colorBrandBackground,
+  },
+  {
+    type: 'claudeAgent',
+    title: 'Claude Assistant',
+    description: 'Advanced reasoning and code generation',
+    icon: <Bot24Regular />,
+    color: tokens.colorPaletteOrangeBackground,
+  },
+  {
+    type: 'localOllamaAgent',
+    title: 'Local Ollama',
+    description: 'Privacy-focused local AI processing',
+    icon: <Laptop24Regular />,
+    color: tokens.colorPaletteGreenBackground,
+  },
+  {
+    type: 'localMSTYAgent',
+    title: 'Local MSTY',
+    description: 'High-performance local inference',
+    icon: <RocketLaunch24Regular />,
+    color: tokens.colorPalettePurpleBackground,
+  },
+  {
+    type: 'julesAgent',
+    title: 'Jules Coder',
+    description: 'Async multi-file implementation',
+    icon: <CodeBlock24Regular />,
+    color: tokens.colorPaletteBlueBackground,
+  },
+  {
+    type: 'copilotAgent',
+    title: 'GitHub Copilot',
+    description: 'Code completion and PR management',
+    icon: <GitFork24Regular />,
+    color: tokens.colorPaletteYellowBackground,
+  },
+  {
+    type: 'customAgent',
+    title: 'Custom Agent',
+    description: 'Configurable specialist agent',
+    icon: <Wrench24Regular />,
+    color: tokens.colorPaletteRedBackground,
+  },
+];
+
 /**
- * The Palette component displays a list of available node types that can be
- * dragged onto the canvas.
- *
- * @description
- * This component uses the standard HTML5 Drag-and-Drop API with enhanced UX.
- * - `onDragStart`: When a drag operation begins, this function is called. It uses
- *   `event.dataTransfer.setData` to store the `nodeType` (e.g., 'assistantAgent')
- *   and a custom MIME type 'application/reactflow'. This data is then accessible
- *   in the `onDrop` event handler on the canvas.
- * - `draggable`: This standard HTML attribute is set to `true` to make the
- *   elements draggable.
- * - Enhanced with modern drag feedback and smooth animations.
+ * Component representing a draggable agent item in the palette
  */
-const Palette = () => {
+const AgentItem: React.FC<{ agent: AgentItem }> = ({ agent }) => {
   const styles = useStyles();
-  const [draggedItem, setDraggedItem] = React.useState<string | null>(null);
-
-  const onDragStart = (event: React.DragEvent, nodeType: string) => {
-    event.dataTransfer.setData('application/reactflow', nodeType);
+  
+  const onDragStart = (event: React.DragEvent) => {
+    event.dataTransfer.setData('application/reactflow', agent.type);
     event.dataTransfer.effectAllowed = 'move';
-    setDraggedItem(nodeType);
-    
-    // Add some visual feedback
-    event.dataTransfer.setDragImage(event.currentTarget as Element, 0, 0);
   };
 
-  const onDragEnd = () => {
-    setDraggedItem(null);
-  };
+  return (
+    <Card
+      className={styles.agentCard}
+      draggable
+      onDragStart={onDragStart}
+      appearance="filled-alternative"
+    >
+      <CardHeader
+        image={<span className={styles.agentIcon}>{agent.icon}</span>}
+        header={<div className={styles.agentTitle}>{agent.title}</div>}
+        description={<Caption1 className={styles.agentDescription}>{agent.description}</Caption1>}
+        className={styles.agentHeader}
+      />
+    </Card>
+  );
+};
 
-  const agentItems = [
-    { type: 'claudeAgent', label: '🧠 Claude Agent', description: 'Advanced reasoning' },
-    { type: 'localOllamaAgent', label: '🖥️ Local Ollama Agent', description: 'Local AI processing' },
-    { type: 'localMSTYAgent', label: '⚡ Local MSTY Agent', description: 'High-performance local' },
-    { type: 'julesAgent', label: '🔍 Jules Coding Agent', description: 'Async coding via Google' },
-    { type: 'copilotAgent', label: '🚀 GitHub Copilot Agent', description: 'Async coding via GitHub' },
-    { type: 'customAgent', label: '🔧 Custom Agent', description: 'Configurable workflows' },
-    { type: 'userProxyAgent', label: '👤 User Proxy Agent', description: 'User representation' },
-  ];
+/**
+ * The main palette component containing all draggable agent types
+ */
+const Palette: React.FC = () => {
+  const styles = useStyles();
 
   return (
     <aside className={styles.palette}>
-      <Title3 className={styles.title}>TeamAID Agents</Title3>
-      {agentItems.map((item) => (
-        <div
-          key={item.type}
-          className={`${styles.paletteItem} ${
-            draggedItem === item.type ? styles.paletteItemDragging : ''
-          }`}
-          onDragStart={(event) => onDragStart(event, item.type)}
-          onDragEnd={onDragEnd}
-          draggable
-          title={item.description}
-          tabIndex={0}
-          role="button"
-          aria-label={`Drag ${item.label} to canvas`}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              // Could implement keyboard support for adding nodes
-              event.preventDefault();
-            }
-          }}
-        >
-          {item.label}
-        </div>
-      ))}
+      <div className={styles.header}>
+        <Title3 className={styles.title}>Agent Library</Title3>
+        <Caption1 className={styles.subtitle}>
+          Drag agents onto the canvas to build your workflow
+        </Caption1>
+      </div>
+      
+      <div className={styles.agentGrid}>
+        {agentItems.map((agent) => (
+          <AgentItem key={agent.type} agent={agent} />
+        ))}
+      </div>
     </aside>
   );
 };

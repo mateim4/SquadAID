@@ -39,8 +39,8 @@ const BuilderPageContent = memo(() => {
 
   // A ref to the React Flow wrapper is needed to get canvas bounds
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  // The useReactFlow hook provides the instance, including the `project` method
-  const { project } = useReactFlow();
+  // The useReactFlow hook provides the instance, including the `screenToFlowPosition` method
+  const { screenToFlowPosition } = useReactFlow();
   
   // Activate the debounced save hook
   useDebouncedSave();
@@ -90,7 +90,7 @@ const BuilderPageContent = memo(() => {
       return;
     }
 
-    const position = project({
+    const position = screenToFlowPosition({
       x: event.clientX,
       y: event.clientY,
     });
@@ -133,7 +133,6 @@ const BuilderPageContent = memo(() => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onMove={debouncedSave}
         nodeTypes={nodeTypes}
         fitView
       >

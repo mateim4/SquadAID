@@ -24,9 +24,8 @@ const useStyles = makeStyles({
     WebkitBackdropFilter: 'blur(20px) saturate(180%)',
     overflow: 'hidden',
     position: 'relative',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: 'box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     '&:hover': {
-      transform: 'translateY(-4px)',
       boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1)',
     },
     '&::before': {
@@ -74,7 +73,10 @@ const useStyles = makeStyles({
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
     transition: 'all 0.2s ease',
     '&:focus': {
-      borderColor: tokens.colorBrandStroke1,
+      borderTopColor: tokens.colorBrandStroke1,
+      borderRightColor: tokens.colorBrandStroke1,
+      borderBottomColor: tokens.colorBrandStroke1,
+      borderLeftColor: tokens.colorBrandStroke1,
       boxShadow: `0 0 0 2px ${tokens.colorBrandStroke1}20`,
     },
   },
@@ -85,7 +87,10 @@ const useStyles = makeStyles({
     transition: 'all 0.2s ease',
     fontFamily: 'ui-monospace, "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", monospace',
     '&:focus': {
-      borderColor: tokens.colorBrandStroke1,
+      borderTopColor: tokens.colorBrandStroke1,
+      borderRightColor: tokens.colorBrandStroke1,
+      borderBottomColor: tokens.colorBrandStroke1,
+      borderLeftColor: tokens.colorBrandStroke1,
       boxShadow: `0 0 0 2px ${tokens.colorBrandStroke1}20`,
     },
   },
