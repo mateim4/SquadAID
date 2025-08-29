@@ -3,7 +3,18 @@
     "allow": [
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(npm install)",
+      "Bash(echo $PATH)",
+      "Bash(whereis:*)",
+      "Bash(/home/mateim/.var/app/com.vscodium.codium/data/node/bin/node --version)",
+      "Bash(sudo dnf install:*)",
+      "Bash(flatpak list:*)",
+      "Bash(sudo /usr/bin/dnf install nodejs npm gh -y)",
+      "Read(/usr/bin/**)",
+      "Bash(bash:*)",
+      "Bash(flatpak-spawn:*)"
     ],
     "deny": [],
     "ask": []
