@@ -1,4 +1,4 @@
-import { memo, useMemo, useEffect, useRef, DragEvent } from 'react';
+import React, { memo, useMemo, useEffect, useRef, DragEvent } from 'react';
 import ReactFlow, {
   Background,
   Controls,
