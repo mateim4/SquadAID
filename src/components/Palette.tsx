@@ -36,6 +36,20 @@ const useStyles = makeStyles({
         backgroundColor: tokens.colorNeutralStroke1,
       },
     },
+    '@media (max-width: 1200px)': {
+      width: '100%',
+      height: '120px',
+      flexDirection: 'row',
+      overflowX: 'auto',
+      overflowY: 'hidden',
+      ...shorthands.borderRight('none'),
+      ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke1),
+      ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalL),
+    },
+    '@media (max-width: 768px)': {
+      height: '100px',
+      ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
+    },
   },
   title: {
     marginBottom: tokens.spacingVerticalM,
@@ -43,6 +57,17 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     fontSize: tokens.fontSizeBase300,
     textAlign: 'center',
+    '@media (max-width: 1200px)': {
+      marginBottom: tokens.spacingVerticalS,
+      marginRight: tokens.spacingHorizontalM,
+      fontSize: tokens.fontSizeBase200,
+      whiteSpace: 'nowrap',
+      flexShrink: 0,
+    },
+    '@media (max-width: 768px)': {
+      fontSize: tokens.fontSizeBase100,
+      marginRight: tokens.spacingHorizontalS,
+    },
   },
   paletteItem: {
     cursor: 'grab',
@@ -58,6 +83,18 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+    whiteSpace: 'nowrap',
+    minWidth: '180px',
+    '@media (max-width: 1200px)': {
+      minWidth: '160px',
+      flexShrink: 0,
+      ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalS),
+    },
+    '@media (max-width: 768px)': {
+      minWidth: '140px',
+      fontSize: tokens.fontSizeBase100,
+      ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalXS),
+    },
     '&::before': {
       content: '""',
       position: 'absolute',

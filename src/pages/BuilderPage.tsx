@@ -6,9 +6,10 @@ import ReactFlow, {
   ReactFlowProvider,
   useReactFlow,
 } from 'reactflow';
-import { useDebouncedCallback } from 'use-debounce';
 import { invoke } from '@tauri-apps/api/tauri';
 import { v4 as uuidv4 } from 'uuid';
+import { getDefaultAgentData, AgentConfig } from '../types/agents';
+import { useDebouncedSave } from '../hooks/useDebouncedSave';
 
 import useFlowStore, { FlowState } from '../store/flow';
 import UserProxyAgentNode from '../components/nodes/UserProxyAgentNode';
@@ -34,14 +35,15 @@ const BuilderPageContent = memo(() => {
     onConnect,
     setFlow,
     addNode, // Get addNode from the store
-    saveFlow,
   } = useFlowStore(selector);
 
   // A ref to the React Flow wrapper is needed to get canvas bounds
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   // The useReactFlow hook provides the instance, including the `project` method
   const { project } = useReactFlow();
-  const debouncedSave = useDebouncedCallback(saveFlow, 1000);
+  
+  // Activate the debounced save hook
+  useDebouncedSave();
   const nodeTypes = useMemo(
     () => ({
       userProxyAgent: UserProxyAgentNode,
@@ -93,86 +95,26 @@ const BuilderPageContent = memo(() => {
       y: event.clientY,
     });
 
-    // Define default data for each agent type
-    const getDefaultData = (type: string) => {
-      switch (type) {
-        case 'claudeAgent':
-          return {
-            name: 'Claude Assistant',
-            role: 'Assistant',
-            description: 'Advanced reasoning and code generation',
-            systemPrompt: 'You are a helpful AI assistant with advanced reasoning capabilities...',
-            temperature: 0.7,
-            capabilities: ['reasoning', 'coding', 'analysis', 'writing']
-          };
-        case 'localOllamaAgent':
-          return {
-            name: 'Local Ollama Agent',
-            role: 'Local AI Assistant',
-            description: 'Local AI agent powered by Ollama models',
-            systemPrompt: 'You are a local AI assistant running on Ollama...',
-            temperature: 0.7,
-            capabilities: ['local-ai', 'offline-processing', 'privacy-focused', 'customizable'],
-            modelName: 'qwen2.5-coder:32b',
-            ollamaEndpoint: 'http://localhost:11434'
-          };
-        case 'localMSTYAgent':
-          return {
-            name: 'Local MSTY Agent',
-            role: 'High-Performance Local AI',
-            description: 'High-performance local AI agent powered by MSTY',
-            systemPrompt: 'You are a high-performance local AI assistant with access to long context...',
-            temperature: 0.7,
-            capabilities: ['local-inference', 'high-performance', 'long-context', 'streaming'],
-            mstyEndpoint: 'http://localhost:10000',
-            modelName: 'llama-3.1-70b',
-            contextLength: 32,
-            streamingEnabled: true
-          };
-        case 'julesAgent':
-          return {
-            name: 'Jules Coding Agent',
-            role: 'Async Coding Assistant',
-            description: 'Google-powered async coding agent with comprehensive implementation capabilities',
-            systemPrompt: 'You are an async coding agent that can implement comprehensive multi-file solutions...',
-            capabilities: ['async-coding', 'multi-file-implementation', 'comprehensive-solutions', 'github-integration'],
-            secureVmEnabled: true,
-            multiFileCapable: true
-          };
-        case 'copilotAgent':
-          return {
-            name: 'GitHub Copilot Agent',
-            role: 'Code Assistant',
-            description: 'GitHub-integrated coding assistant with PR management',
-            systemPrompt: 'You are a GitHub Copilot integration agent responsible for code completion and PR management...',
-            capabilities: ['coding', 'github-integration', 'code-completion', 'pr-creation'],
-            githubIntegration: true,
-            autoAssignment: false,
-            prAnalysis: true
-          };
-        case 'customAgent':
-          return {
-            name: 'Custom Agent',
-            role: 'Specialist Agent',
-            description: 'Custom agent with configurable capabilities and tools',
-            systemPrompt: 'Define your custom agent\'s behavior and responsibilities...',
-            temperature: 0.7,
-            capabilities: ['custom-logic', 'flexible-processing'],
-            tools: ['create_file', 'read_file', 'execute_bash', 'list_directory'],
-            workflow: 'sequential'
-          };
-        case 'userProxyAgent':
-          return { name: 'New User Proxy' };
-        default:
-          return { name: 'Unknown Agent' };
+    // Convert node type to agent config type for type safety
+    const getAgentConfigType = (nodeType: string): AgentConfig['type'] => {
+      switch (nodeType) {
+        case 'claudeAgent': return 'ClaudeAgent';
+        case 'localOllamaAgent': return 'LocalOllamaAgent';
+        case 'localMSTYAgent': return 'LocalMSTYAgent';
+        case 'julesAgent': return 'JulesAgent';
+        case 'copilotAgent': return 'CopilotAgent';
+        case 'customAgent': return 'CustomAgent';
+        case 'userProxyAgent': return 'UserProxyAgent';
+        default: return 'UserProxyAgent';
       }
     };
 
+    const agentType = getAgentConfigType(type);
     const newNode = {
       id: uuidv4(),
       type,
       position,
-      data: getDefaultData(type),
+      data: getDefaultAgentData(agentType),
     };
 
     addNode(newNode);
@@ -206,7 +148,7 @@ const BuilderPageContent = memo(() => {
 // The main layout now includes the Palette alongside the canvas.
 // The outer div uses display: flex to position them side-by-side.
 const BuilderPage = () => (
-  <div style={{ display: 'flex', height: '100%' }}>
+  <div className="builder-page-main">
     <ReactFlowProvider>
       <Palette />
       <BuilderPageContent />

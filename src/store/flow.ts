@@ -23,7 +23,8 @@ export interface FlowState {
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
   setFlow: (flow: { nodes: Node[]; edges: Edge[]; viewport: Viewport }) => void;
-  addNode: (node: Node) => void; // Add the new action type
+  addNode: (node: Node) => void;
+  updateNodeData: (nodeId: string, data: any) => void;
   saveFlow: () => void;
 }
 
@@ -64,6 +65,22 @@ const useFlowStore = create<FlowState>((set, get) => ({
    */
   addNode: (node: Node) => {
     set((state) => ({ nodes: [...state.nodes, node] }));
+  },
+
+  /**
+   * Updates the data of a specific node by ID.
+   * Creates a new object to trigger a re-render with proper immutable updates.
+   */
+  updateNodeData: (nodeId: string, data: any) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId) {
+          // It's important to create a new object to trigger a re-render
+          return { ...node, data: { ...node.data, ...data } };
+        }
+        return node;
+      }),
+    });
   },
 
   saveFlow: () => {

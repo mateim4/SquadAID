@@ -14,47 +14,133 @@ import {
 
 const useStyles = makeStyles({
   card: {
-    width: '320px',
+    width: '360px',
+    minHeight: '280px',
+    backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorPalettePurpleBorder1),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    boxShadow: '0 4px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+    backdropFilter: 'blur(20px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+    overflow: 'hidden',
+    position: 'relative',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    '&:hover': {
+      transform: 'translateY(-4px)',
+      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+    },
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      right: '0',
+      height: '4px',
+      background: `linear-gradient(90deg, ${tokens.colorPalettePurpleBackground}, ${tokens.colorPalettePinkBackground})`,
+      borderRadius: `${tokens.borderRadiusLarge} ${tokens.borderRadiusLarge} 0 0`,
+    },
   },
   cardHeader: {
-    backgroundColor: tokens.colorPalettePurpleBorder2,
-    color: tokens.colorNeutralForegroundOnBrand,
+    backgroundColor: 'transparent',
+    color: tokens.colorNeutralForeground1,
+    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalL),
+    ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke2),
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightSemibold,
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap(tokens.spacingHorizontalS),
   },
   cardContent: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap(tokens.spacingVerticalS),
-    ...shorthands.padding(tokens.spacingVerticalM),
+    ...shorthands.gap(tokens.spacingVerticalM),
+    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalL),
+    flex: 1,
+  },
+  inputGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap(tokens.spacingVerticalXS),
+  },
+  label: {
+    fontSize: tokens.fontSizeBase200,
+    fontWeight: tokens.fontWeightMedium,
+    color: tokens.colorNeutralForeground2,
+  },
+  input: {
+    fontSize: tokens.fontSizeBase200,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
+    transition: 'all 0.2s ease',
+    '&:focus': {
+      borderColor: tokens.colorBrandStroke1,
+      boxShadow: `0 0 0 2px ${tokens.colorBrandStroke1}20`,
+    },
+  },
+  textarea: {
+    fontSize: tokens.fontSizeBase200,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
+    transition: 'all 0.2s ease',
+    fontFamily: 'ui-monospace, "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", monospace',
+    '&:focus': {
+      borderColor: tokens.colorBrandStroke1,
+      boxShadow: `0 0 0 2px ${tokens.colorBrandStroke1}20`,
+    },
+  },
+  slider: {
+    marginTop: tokens.spacingVerticalS,
   },
   nodrag: {
     pointerEvents: 'all',
+    userSelect: 'text',
   },
   handle: {
-    width: '10px',
-    height: '10px',
+    width: '12px',
+    height: '12px',
+    borderRadius: '50%',
+    border: `2px solid ${tokens.colorPalettePurpleBorder1}`,
+    backgroundColor: tokens.colorNeutralBackground1,
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      transform: 'scale(1.3)',
+      boxShadow: `0 0 0 3px ${tokens.colorPalettePurpleBorder1}40`,
+    },
   },
   capabilityChips: {
     display: 'flex',
     flexWrap: 'wrap',
     ...shorthands.gap(tokens.spacingHorizontalXS),
+    marginTop: tokens.spacingVerticalXS,
   },
   chip: {
-    fontSize: '12px',
-    ...shorthands.padding('2px', '6px'),
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    fontSize: tokens.fontSizeBase100,
+    fontWeight: tokens.fontWeightMedium,
+    ...shorthands.padding(tokens.spacingVerticalXXS, tokens.spacingHorizontalS),
+    backgroundColor: `${tokens.colorPalettePurpleBackground}20`,
+    color: tokens.colorPalettePurpleForeground1,
+    ...shorthands.border('1px', 'solid', `${tokens.colorPalettePurpleBorder1}40`),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)',
   },
   githubSection: {
     ...shorthands.border('1px', 'solid', tokens.colorPalettePurpleBorder1),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    ...shorthands.padding(tokens.spacingVerticalS),
-    backgroundColor: tokens.colorPalettePurpleBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalM),
+    backgroundColor: `${tokens.colorPalettePurpleBackground1}10`,
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)',
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap(tokens.spacingVerticalS),
   },
   switchContainer: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap(tokens.spacingHorizontalS),
+    marginTop: tokens.spacingVerticalS,
   },
 });
 
@@ -92,80 +178,93 @@ const CopilotAgentNode = memo(({ id, data }: NodeProps<CopilotAgentNodeData>) =>
         position={Position.Left}
         className={styles.handle}
       />
-      <CardHeader
-        className={styles.cardHeader}
-        header={<b>🚀 GitHub Copilot Agent</b>}
-      />
+      <CardHeader className={styles.cardHeader}>
+        <span>🚀</span>
+        <span>GitHub Copilot Agent</span>
+      </CardHeader>
       <div className={styles.cardContent}>
-        <Label htmlFor={`name-${id}`}>Name</Label>
-        <Input
-          id={`name-${id}`}
-          defaultValue={name}
-          className={styles.nodrag}
-          placeholder="e.g., Copilot Bridge Agent"
-        />
+        <div className={styles.inputGroup}>
+          <Label className={styles.label}>Name</Label>
+          <Input
+            defaultValue={name}
+            className={`${styles.input} ${styles.nodrag}`}
+            placeholder="e.g., Copilot Bridge Agent"
+            size="small"
+          />
+        </div>
 
-        <Label htmlFor={`role-${id}`}>Role</Label>
-        <Input
-          id={`role-${id}`}
-          defaultValue={role}
-          className={styles.nodrag}
-          placeholder="e.g., Code Assistant"
-        />
+        <div className={styles.inputGroup}>
+          <Label className={styles.label}>Role</Label>
+          <Input
+            defaultValue={role}
+            className={`${styles.input} ${styles.nodrag}`}
+            placeholder="e.g., Code Assistant"
+            size="small"
+          />
+        </div>
 
-        <Label htmlFor={`description-${id}`}>Description</Label>
-        <Textarea
-          id={`description-${id}`}
-          defaultValue={description}
-          className={styles.nodrag}
-          placeholder="GitHub-integrated coding assistant with PR management"
-          rows={2}
-          resize="vertical"
-        />
+        <div className={styles.inputGroup}>
+          <Label className={styles.label}>Description</Label>
+          <Textarea
+            defaultValue={description}
+            className={`${styles.textarea} ${styles.nodrag}`}
+            placeholder="GitHub-integrated coding assistant with PR management"
+            rows={2}
+            resize="vertical"
+            size="small"
+          />
+        </div>
 
-        <Label htmlFor={`system-prompt-${id}`}>System Prompt</Label>
-        <Textarea
-          id={`system-prompt-${id}`}
-          defaultValue={systemPrompt}
-          className={styles.nodrag}
-          placeholder="You are a GitHub Copilot integration agent responsible for code completion and PR management..."
-          rows={3}
-          resize="vertical"
-        />
+        <div className={styles.inputGroup}>
+          <Label className={styles.label}>System Prompt</Label>
+          <Textarea
+            defaultValue={systemPrompt}
+            className={`${styles.textarea} ${styles.nodrag}`}
+            placeholder="You are a GitHub Copilot integration agent responsible for code completion and PR management..."
+            rows={3}
+            resize="vertical"
+            size="small"
+          />
+        </div>
 
         <div className={styles.githubSection}>
           <div className={styles.switchContainer}>
             <Switch 
               defaultChecked={githubIntegration}
               className={styles.nodrag}
+              size="small"
             />
-            <Label>GitHub Integration</Label>
+            <Label className={styles.label}>GitHub Integration</Label>
           </div>
           
           <div className={styles.switchContainer}>
             <Switch 
               defaultChecked={autoAssignment}
               className={styles.nodrag}
+              size="small"
             />
-            <Label>Auto Task Assignment</Label>
+            <Label className={styles.label}>Auto Task Assignment</Label>
           </div>
 
           <div className={styles.switchContainer}>
             <Switch 
               defaultChecked={prAnalysis}
               className={styles.nodrag}
+              size="small"
             />
-            <Label>PR Result Analysis</Label>
+            <Label className={styles.label}>PR Result Analysis</Label>
           </div>
         </div>
 
-        <Label>Capabilities</Label>
-        <div className={styles.capabilityChips}>
-          {(capabilities || defaultCapabilities).map((capability) => (
-            <span key={capability} className={styles.chip}>
-              {capability}
-            </span>
-          ))}
+        <div className={styles.inputGroup}>
+          <Label className={styles.label}>Capabilities</Label>
+          <div className={styles.capabilityChips}>
+            {(capabilities || defaultCapabilities).map((capability) => (
+              <span key={capability} className={styles.chip}>
+                {capability}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
       <Handle
