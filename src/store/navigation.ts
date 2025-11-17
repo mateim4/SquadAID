@@ -1,17 +1,18 @@
 import { create } from 'zustand';
 
-export type View = 'builder' | 'playground' | 'settings';
-
-interface NavigationState {
-  currentView: View;
-  navigateTo: (view: View) => void;
+export enum View {
+  Builder = 'builder',
+  Playground = 'playground',
+  Settings = 'settings',
+  Projects = 'projects',
 }
 
-/**
- * A Zustand store for managing the application's current view (routing).
- * This replaces react-router-dom for simpler desktop app navigation.
- */
+interface NavigationState {
+  view: View;
+  setView: (view: View) => void;
+}
+
 export const useNavigationStore = create<NavigationState>((set) => ({
-  currentView: 'builder', // Default view
-  navigateTo: (view) => set({ currentView: view }),
+  view: View.Builder,
+  setView: (view) => set({ view }),
 }));

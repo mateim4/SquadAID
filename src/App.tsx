@@ -1,262 +1,125 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FluentProvider,
-  Button,
-  Tab,
   TabList,
-  makeStyles,
-  shorthands,
-  tokens,
-  Title2,
+  Tab,
+  Title3,
+  Tooltip,
+    ToggleButton,
 } from '@fluentui/react-components';
 import {
-  WeatherSunny24Filled,
-  WeatherMoon24Filled,
-  Settings24Regular,
-  BotSparkle24Regular,
+    WeatherSunny24Regular,
+    WeatherMoon24Regular,
+    PlayCircle24Regular,
+    Briefcase24Regular,
+    PeopleTeam24Regular,
+    Cube24Regular,
+    Settings24Regular,
 } from '@fluentui/react-icons';
-import { useThemeStore } from './store/theme';
-import { useNavigationStore, View } from './store/navigation';
-import BuilderPage from './pages/BuilderPage';
-import PlaygroundPage from './pages/PlaygroundPage';
-import SettingsPage from './pages/SettingsPage';
-import WeatherBackground from './components/WeatherBackground';
-import './App.css';
+import { useStyles } from '@/styles/useStyles';
+import { squadAIDLightTheme, squadAIDDarkTheme } from '@/styles/themes';
+import { AnimatedBackground } from '@/components/background/AnimatedBackground';
+import { AgentLibrary } from '@/components/layout/AgentLibrary';
+import { WorkflowLibrary } from '@/components/layout/WorkflowLibrary';
+import { WorkflowCanvas } from '@/components/canvas/WorkflowCanvas';
+import PlaygroundPage from '@/views/PlaygroundPage';
+import AnalyticsPage from '@/views/AnalyticsPage';
+import { HealthIndicator } from '@/components/status/HealthIndicator';
+import SettingsPage from '@/pages/SettingsPage';
+import ProjectsPage from '@/pages/ProjectsPage';
 
-const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    background: tokens.colorNeutralBackground1,
-    fontFamily: tokens.fontFamilyBase,
-    position: 'relative',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: `radial-gradient(circle at 30% 20%, ${tokens.colorBrandBackground}15 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${tokens.colorBrandBackground2}10 0%, transparent 50%), radial-gradient(circle at 60% 60%, ${tokens.colorBrandBackground3}08 0%, transparent 40%)`,
-      pointerEvents: 'none',
-      animation: 'gradientShift 30s ease-in-out infinite',
-    },
-  },
-  titleBar: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke2),
-    backdropFilter: 'blur(60px) saturate(200%)',
-    WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-    position: 'relative',
-    zIndex: 100,
-    boxShadow: `0 0 0 0.5px ${tokens.colorNeutralStroke1}, 0 2px 8px ${tokens.colorNeutralShadowAmbient}, 0 8px 32px ${tokens.colorNeutralShadowKey}, inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.05)`,
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: '0',
-      left: '0',
-      right: '0',
-      bottom: '0',
-      background: `linear-gradient(90deg, transparent 0%, ${tokens.colorBrandBackground}06 25%, ${tokens.colorBrandBackground}08 50%, ${tokens.colorBrandBackground}06 75%, transparent 100%)`,
-      pointerEvents: 'none',
-      opacity: 0.4,
-    },
-  },
-  branding: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-  },
-  brandIcon: {
-    color: tokens.colorBrandForeground1,
-    fontSize: '28px',
-    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-    position: 'relative',
-    filter: `drop-shadow(0 2px 8px ${tokens.colorBrandShadowAmbient})`,
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      width: '0px',
-      height: '0px',
-      background: `radial-gradient(circle, ${tokens.colorBrandBackground}20, transparent 70%)`,
-      borderRadius: '50%',
-      transform: 'translate(-50%, -50%)',
-      transition: 'all 0.5s ease-out',
-      zIndex: -1,
-    },
-    '&:hover': {
-      transform: 'scale(1.1) rotate(360deg)',
-      filter: `drop-shadow(0 4px 16px ${tokens.colorBrandShadowKey})`,
-      '&::before': {
-        width: '60px',
-        height: '60px',
-      },
-    },
-  },
-  brandTitle: {
-    color: tokens.colorNeutralForeground1,
-    fontWeight: tokens.fontWeightSemibold,
-    fontSize: tokens.fontSizeHero700,
-    lineHeight: tokens.lineHeightHero700,
-  },
-  navigation: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-  },
-  controls: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-  },
-  contentArea: {
-    flex: 1,
-    overflow: 'hidden',
-    position: 'relative',
-    zIndex: 1,
-  },
-  themeButton: {
-    minWidth: 'auto',
-    width: '36px',
-    height: '36px',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    position: 'relative',
-    overflow: 'hidden',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      width: '0px',
-      height: '0px',
-      background: `radial-gradient(circle, ${tokens.colorBrandBackground}30, transparent 70%)`,
-      borderRadius: '50%',
-      transform: 'translate(-50%, -50%)',
-      transition: 'all 0.4s ease-out',
-      zIndex: -1,
-    },
-    '&:hover': {
-      transform: 'scale(1.05)',
-      boxShadow: `0 4px 12px ${tokens.colorBrandShadowAmbient}`,
-      '&::before': {
-        width: '60px',
-        height: '60px',
-      },
-    },
-    '&:active': {
-      transform: 'scale(0.95)',
-    },
-  },
-  settingsButton: {
-    minWidth: 'auto',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    position: 'relative',
-    overflow: 'hidden',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      width: '0px',
-      height: '0px',
-      background: `radial-gradient(circle, ${tokens.colorBrandBackground}25, transparent 70%)`,
-      borderRadius: '50%',
-      transform: 'translate(-50%, -50%)',
-      transition: 'all 0.4s ease-out',
-      zIndex: -1,
-    },
-    '&:hover': {
-      transform: 'translateY(-2px)',
-      boxShadow: `0 6px 16px ${tokens.colorBrandShadowAmbient}`,
-      '&::before': {
-        width: '80px',
-        height: '80px',
-      },
-    },
-    '&:active': {
-      transform: 'translateY(0px) scale(0.98)',
-    },
-  },
-});
+const App: React.FC = () => {
+    const styles = useStyles();
+    const [isDarkTheme, setIsDarkTheme] = useState(true);
+    const [selectedTab, setSelectedTab] = useState('team-builder');
+    // Sync tab with hash routing (e.g., #/playground)
+    useEffect(() => {
+        const applyHash = () => {
+            const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+            if (hash === 'playground' && selectedTab !== 'playground') setSelectedTab('playground');
+            else if (hash === 'analytics' && selectedTab !== 'analytics') setSelectedTab('analytics');
+            else if ((hash === 'projects' || hash === 'project') && selectedTab !== 'projects') setSelectedTab('projects');
+            else if ((hash === 'team' || hash === 'team-builder' || hash === 'builder') && selectedTab !== 'team-builder') setSelectedTab('team-builder');
+            else if (hash === 'settings' && selectedTab !== 'settings') setSelectedTab('settings');
+        };
+        applyHash();
+        window.addEventListener('hashchange', applyHash);
+        return () => window.removeEventListener('hashchange', applyHash);
+    }, [selectedTab]);
 
-/**
- * A component to render the currently selected view.
- */
-const CurrentView = () => {
-  const { currentView } = useNavigationStore();
+    const onTabSelect = (_: any, data: any) => {
+        const value = data.value as string;
+        setSelectedTab(value);
+    const nextHash = value === 'playground' ? '#/playground' : value === 'analytics' ? '#/analytics' : value === 'projects' ? '#/projects' : value === 'settings' ? '#/settings' : '#/team-builder';
+        if (window.location.hash !== nextHash) window.location.hash = nextHash;
+    };
+    // Team Builder sidebars are fixed width (non-collapsible) per design system
 
-  switch (currentView) {
-    case 'builder':
-      return <BuilderPage />;
-    case 'playground':
-      return <PlaygroundPage />;
-    case 'settings':
-      return <SettingsPage />;
-    default:
-      return <BuilderPage />;
-  }
+    const theme = isDarkTheme ? squadAIDDarkTheme : squadAIDLightTheme;
+
+    return (
+        <FluentProvider theme={theme} className="accent-gradient">
+            <div className={`${styles.root} ${isDarkTheme ? styles.rootDark : styles.rootLight}`}>
+                <AnimatedBackground isDarkTheme={isDarkTheme}/>
+                <div className={styles.mainUI}>
+                                        <header className={`${styles.header} ${isDarkTheme ? styles.headerDark : styles.headerLight}`}>
+                                                <div className={styles.headerTitle}>
+                                                     <Cube24Regular fontSize={30}/>
+                                                     <Title3 style={{ fontSize: 22 }}>SquadAID</Title3>
+                                                </div>
+                                                <nav role="navigation" aria-label="Main navigation">
+                                                <TabList selectedValue={selectedTab} onTabSelect={onTabSelect}>
+                                                        <Tab value="projects" className={styles.tab} icon={<Briefcase24Regular fontSize={22}/>}>Projects</Tab>
+                                                        <Tab value="team-builder" className={styles.tab} icon={<PeopleTeam24Regular fontSize={22}/>}>Team Builder</Tab>
+                                                        <Tab value="playground" className={styles.tab} icon={<PlayCircle24Regular fontSize={22}/>}>Playground</Tab>
+                                                        <Tab value="analytics" className={styles.tab} icon={<Cube24Regular fontSize={22}/>}>Analytics</Tab>
+                                                    <Tab value="settings" className={styles.tab} icon={<Settings24Regular fontSize={22}/>}>Settings</Tab>
+                                                </TabList>
+                                                </nav>
+                                                <div className={styles.headerControls}>
+                                                    <HealthIndicator />
+                                                    <Tooltip content={isDarkTheme ? "Switch to Light Mode" : "Switch to Dark Mode"} relationship="label">
+                                                        <ToggleButton 
+                                                                checked={!isDarkTheme} 
+                                                                onClick={() => setIsDarkTheme(!isDarkTheme)} 
+                                                                icon={isDarkTheme ? <WeatherMoon24Regular /> : <WeatherSunny24Regular />}
+                                                                aria-label={isDarkTheme ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                                                title={isDarkTheme ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                                                style={{ backgroundColor: isDarkTheme ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)' }}
+                                                         />
+                                                    </Tooltip>
+                                                </div>
+                                        </header>
+
+                    <main className={styles.mainContent}>
+                        {selectedTab === 'team-builder' && (
+                            <>
+                                <AgentLibrary />
+                                <WorkflowCanvas />
+                                <WorkflowLibrary />
+                            </>
+                        )}
+                                                {selectedTab === 'projects' && (
+                                                    <ProjectsPage
+                                                        render={({ left, content, right }) => (
+                                                            <>
+                                                                {/* reuse Team Builder grid with sidebars */}
+                                                                <div aria-hidden style={{ display: 'contents' }} />
+                                                                {left}
+                                                                {content}
+                                                                {right}
+                                                            </>
+                                                        )}
+                                                    />
+                                                )}
+                        {selectedTab === 'playground' && <PlaygroundPage />}
+                        {selectedTab === 'analytics' && <AnalyticsPage />}
+                        {selectedTab === 'settings' && <SettingsPage />}
+                    </main>
+                </div>
+            </div>
+        </FluentProvider>
+    );
 };
-
-/**
- * The root component of the application.
- */
-function App() {
-  const { theme, themeName, toggleTheme } = useThemeStore();
-  const { currentView, navigateTo } = useNavigationStore();
-  const styles = useStyles();
-
-  return (
-    <FluentProvider theme={theme}>
-      <WeatherBackground />
-      <div className={styles.container}>
-        <div className={styles.titleBar}>
-          <div className={styles.branding}>
-            <BotSparkle24Regular className={styles.brandIcon} />
-            <Title2 className={styles.brandTitle}>SquladAID</Title2>
-          </div>
-
-          <div className={styles.navigation}>
-            <TabList
-              selectedValue={currentView}
-              onTabSelect={(_, data) => navigateTo(data.value as View)}
-              size="large"
-            >
-              <Tab value="builder">Builder</Tab>
-              <Tab value="playground">Playground</Tab>
-            </TabList>
-          </div>
-
-          <div className={styles.controls}>
-            <Button
-              onClick={() => navigateTo('settings')}
-              appearance="subtle"
-              icon={<Settings24Regular />}
-              className={styles.settingsButton}
-            >
-              Settings
-            </Button>
-            <Button 
-              onClick={toggleTheme} 
-              appearance="subtle"
-              icon={themeName === 'light' ? <WeatherMoon24Filled /> : <WeatherSunny24Filled />}
-              className={styles.themeButton}
-              title={themeName === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-            />
-          </div>
-        </div>
-        <div className={styles.contentArea}>
-          <CurrentView />
-        </div>
-      </div>
-    </FluentProvider>
-  );
-}
 
 export default App;

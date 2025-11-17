@@ -18,14 +18,10 @@ export const useDebouncedSave = () => {
     // Set a new timeout to save the data
     timeoutRef.current = window.setTimeout(() => {
       if (nodes.length > 0 || edges.length > 0) {
-        const graphState = { nodes, edges, viewport };
-        
-        console.log('Debounced save triggered. Saving workflow...', graphState);
-        
         // Use the saveFlow method from the store
         useFlowStore.getState().saveFlow();
       }
-    }, 1000); // 1-second debounce delay
+    }, 2000); // 2-second debounce delay for better performance
 
     // Cleanup function to clear the timeout if the component unmounts
     return () => {

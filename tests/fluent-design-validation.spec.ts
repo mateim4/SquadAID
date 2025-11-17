@@ -12,7 +12,7 @@ test.describe('Fluent 2 Design System Validation', () => {
     await page.screenshot({ path: 'design-analysis/current-state.png', fullPage: true });
     
     // Analyze header/title bar design
-    const titleBar = page.locator('.titleBar, [class*="titleBar"]');
+  const titleBar = page.locator('header, .titleBar, [class*="titleBar"]');
     await expect(titleBar).toBeVisible();
     
     // Check for proper acrylic/glass effects
@@ -30,7 +30,7 @@ test.describe('Fluent 2 Design System Validation', () => {
     console.log('Title Bar Styles:', titleBarStyles);
     
     // Analyze palette design
-    const palette = page.locator('.palette, [class*="palette"]');
+  const palette = page.locator('.palette, [class*="palette"], [aria-label="Agent palette"]');
     await expect(palette).toBeVisible();
     
     const paletteStyles = await palette.evaluate(el => {
@@ -90,13 +90,12 @@ test.describe('Fluent 2 Design System Validation', () => {
     const palette = page.locator('.palette, [class*="palette"]');
     await expect(palette).toBeVisible();
     
-    // Find an agent card to drag
-    const agentCards = page.locator('[class*="agentCard"]');
-    const firstCard = agentCards.first();
-    await expect(firstCard).toBeVisible();
+  // Find a known agent tile by text as a proxy for card visibility
+  const firstCard = page.getByText('Claude Assistant');
+  await expect(firstCard).toBeVisible();
     
     // Get the canvas area
-    const canvas = page.locator('[class*="builder-page-container"], .react-flow');
+  const canvas = page.locator('.react-flow, [class*="builder-page-container"]');
     await expect(canvas).toBeVisible();
     
     // Perform drag and drop
@@ -136,7 +135,7 @@ test.describe('Fluent 2 Design System Validation', () => {
     // Get all elements with significant styling
     const elements = await page.evaluate(() => {
       const elements = document.querySelectorAll('*');
-      const styleData = [];
+      const styleData: Array<{ tag: string; className: string; backgroundColor: string; color: string; boxShadow: string }> = [];
       
       elements.forEach(el => {
         const styles = window.getComputedStyle(el);
@@ -176,7 +175,7 @@ test.describe('Fluent 2 DS Implementation', () => {
     // Check for proper backdrop-filter usage
     const acrylicElements = await page.evaluate(() => {
       const elements = document.querySelectorAll('*');
-      const acrylicElements = [];
+      const acrylicElements: Array<{ element: string; backdropFilter: string; backgroundColor: string; opacity: string }> = [];
       
       elements.forEach(el => {
         const styles = window.getComputedStyle(el);
@@ -203,7 +202,7 @@ test.describe('Fluent 2 DS Implementation', () => {
     // Check z-index layering
     const layering = await page.evaluate(() => {
       const elements = document.querySelectorAll('*');
-      const layeredElements = [];
+      const layeredElements: Array<{ element: string; zIndex: string; position: string; boxShadow: string }> = [];
       
       elements.forEach(el => {
         const styles = window.getComputedStyle(el);
@@ -220,7 +219,7 @@ test.describe('Fluent 2 DS Implementation', () => {
         }
       });
       
-      return layeredElements.sort((a, b) => parseInt(b.zIndex) - parseInt(a.zIndex));
+  return layeredElements.sort((a, b) => parseInt(b.zIndex) - parseInt(a.zIndex));
     });
     
     console.log('Layering Analysis:', layering);

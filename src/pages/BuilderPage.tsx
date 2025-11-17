@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useEffect, useRef, DragEvent } from 'react';
+import { memo, useMemo, useEffect, useRef, DragEvent } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -6,22 +6,14 @@ import ReactFlow, {
   ReactFlowProvider,
   useReactFlow,
 } from 'reactflow';
+import { useDebouncedCallback } from 'use-debounce';
 import { invoke } from '@tauri-apps/api/tauri';
 import { v4 as uuidv4 } from 'uuid';
-import { getDefaultAgentData, AgentConfig } from '../types/agents';
-import { useDebouncedSave } from '../hooks/useDebouncedSave';
 
 import useFlowStore, { FlowState } from '../store/flow';
+import AssistantAgentNode from '../components/nodes/AssistantAgentNode';
 import UserProxyAgentNode from '../components/nodes/UserProxyAgentNode';
-import ClaudeAgentNode from '../components/nodes/ClaudeAgentNode';
-import LocalOllamaAgentNode from '../components/nodes/LocalOllamaAgentNode';
-import LocalMSTYAgentNode from '../components/nodes/LocalMSTYAgentNode';
-import JulesAgentNode from '../components/nodes/JulesAgentNode';
-import CopilotAgentNode from '../components/nodes/CopilotAgentNode';
-import CustomAgentNode from '../components/nodes/CustomAgentNode';
 import Palette from '../components/Palette'; // Import the new Palette component
-import WorkflowLibrary from '../components/WorkflowLibrary';
-import MinimapNode from '../components/MinimapNode';
 
 import 'reactflow/dist/style.css';
 import './BuilderPage.css';
@@ -37,24 +29,18 @@ const BuilderPageContent = memo(() => {
     onConnect,
     setFlow,
     addNode, // Get addNode from the store
+    saveFlow,
   } = useFlowStore(selector);
 
   // A ref to the React Flow wrapper is needed to get canvas bounds
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  // The useReactFlow hook provides the instance, including the `screenToFlowPosition` method
-  const { screenToFlowPosition } = useReactFlow();
-  
-  // Activate the debounced save hook
-  useDebouncedSave();
+  // The useReactFlow hook provides the instance, including the `project` method
+  const { project } = useReactFlow();
+  const debouncedSave = useDebouncedCallback(saveFlow, 1000);
   const nodeTypes = useMemo(
     () => ({
+      assistantAgent: AssistantAgentNode,
       userProxyAgent: UserProxyAgentNode,
-      claudeAgent: ClaudeAgentNode,
-      localOllamaAgent: LocalOllamaAgentNode,
-      localMSTYAgent: LocalMSTYAgentNode,
-      julesAgent: JulesAgentNode,
-      copilotAgent: CopilotAgentNode,
-      customAgent: CustomAgentNode,
     }),
     []
   );
@@ -73,18 +59,6 @@ const BuilderPageContent = memo(() => {
     event.dataTransfer.dropEffect = 'move';
   };
 
-  const onNodeDragStart = (event: any, node: any) => {
-    console.log('Node drag started:', node.id);
-  };
-
-  const onNodeDrag = (event: any, node: any) => {
-    console.log('Node dragging:', node.id);
-  };
-
-  const onNodeDragStop = (event: any, node: any) => {
-    console.log('Node drag stopped:', node.id);
-  };
-
   /**
    * Handles the drop event when a node from the palette is dropped on the canvas.
    *
@@ -100,40 +74,23 @@ const BuilderPageContent = memo(() => {
     event.preventDefault();
 
     const type = event.dataTransfer.getData('application/reactflow');
-    console.log('Drop event triggered, type:', type);
-    
     if (!type) {
-      console.log('No type found in dataTransfer');
       return;
     }
 
-    const position = screenToFlowPosition({
+    const position = project({
       x: event.clientX,
       y: event.clientY,
     });
-    
-    console.log('Drop position:', position);
 
-    // Convert node type to agent config type for type safety
-    const getAgentConfigType = (nodeType: string): AgentConfig['type'] => {
-      switch (nodeType) {
-        case 'claudeAgent': return 'ClaudeAgent';
-        case 'localOllamaAgent': return 'LocalOllamaAgent';
-        case 'localMSTYAgent': return 'LocalMSTYAgent';
-        case 'julesAgent': return 'JulesAgent';
-        case 'copilotAgent': return 'CopilotAgent';
-        case 'customAgent': return 'CustomAgent';
-        case 'userProxyAgent': return 'UserProxyAgent';
-        default: return 'UserProxyAgent';
-      }
-    };
-
-    const agentType = getAgentConfigType(type);
     const newNode = {
       id: uuidv4(),
       type,
       position,
-      data: getDefaultAgentData(agentType),
+      data:
+        type === 'assistantAgent'
+          ? { name: 'New Agent', systemMessage: 'You are a helpful assistant.' }
+          : { name: 'New User Proxy' },
     };
 
     addNode(newNode);
@@ -152,43 +109,25 @@ const BuilderPageContent = memo(() => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onNodeDragStart={onNodeDragStart}
-        onNodeDrag={onNodeDrag}
-        onNodeDragStop={onNodeDragStop}
+        onMove={debouncedSave}
         nodeTypes={nodeTypes}
-        nodesDraggable={true}
-        nodesConnectable={true}
-        elementsSelectable={true}
         fitView
       >
         <Controls />
-        <MiniMap 
-          nodeComponent={MinimapNode}
-          position="bottom-right"
-          zoomable
-          pannable
-          maskColor="rgba(99, 102, 241, 0.1)"
-          maskStrokeColor="#6366f1"
-          maskStrokeWidth={2}
-        />
-        <Background 
-          gap={20} 
-          size={0.5} 
-          color="rgba(0, 123, 255, 0.1)"
-          variant="dots"
-        />
+        <MiniMap />
+        <Background gap={12} size={1} />
       </ReactFlow>
     </div>
   );
 });
 
-// The main layout now includes the Palette on the left, canvas in the middle, and WorkflowLibrary on the right
+// The main layout now includes the Palette alongside the canvas.
+// The outer div uses display: flex to position them side-by-side.
 const BuilderPage = () => (
-  <div className="builder-page-main">
+  <div style={{ display: 'flex', height: '100%' }}>
     <ReactFlowProvider>
       <Palette />
       <BuilderPageContent />
-      <WorkflowLibrary />
     </ReactFlowProvider>
   </div>
 );

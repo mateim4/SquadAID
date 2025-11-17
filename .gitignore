@@ -33,6 +33,7 @@ Thumbs.db
 # Logs
 logs
 *.log
+nohup.out
 
 # Runtime data
 pids
@@ -47,3 +48,21 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# AI Models (very large files)
+ollama_models/
+*.gguf
+*.bin
+download_models.py
+
+# Database
+db/
+
+# Test artifacts
+test-results/
+playwright-report/
+
+# Project-specific
+mock-server.cjs
+github-proxy.cjs
+test-workflow.cjs

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 import {
   Card,
@@ -9,92 +9,57 @@ import {
   shorthands,
   tokens,
   Label,
+  Textarea,
+  Button,
 } from '@fluentui/react-components';
+import { useWorkflowStore } from '@/store/workflowStore';
+import { ChevronDown24Regular, ChevronUp24Regular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   card: {
-    width: '320px',
-    minHeight: '200px',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    ...shorthands.border('1px', 'solid', 'rgba(255, 255, 255, 0.4)'),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    boxShadow: '0 0 0 0.5px rgba(255, 255, 255, 0.9), 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)',
-    backdropFilter: 'blur(40px) saturate(1.8)',
-    WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-    overflow: 'hidden',
-    position: 'relative',
-    cursor: 'grab',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      boxShadow: '0 0 0 0.5px rgba(255, 255, 255, 1), 0 16px 64px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)',
-    },
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: '0',
-      left: '0',
-      right: '0',
-      height: '4px',
-      background: `linear-gradient(90deg, ${tokens.colorBrandBackground}, ${tokens.colorBrandBackground2})`,
-      borderRadius: `${tokens.borderRadiusLarge} ${tokens.borderRadiusLarge} 0 0`,
-    },
+  width: '300px',
+  position: 'relative',
+  overflow: 'hidden',
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
   },
   cardHeader: {
-    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
-    color: tokens.colorNeutralForeground1,
-    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalL),
-    ...shorthands.borderBottom('1px', 'solid', 'rgba(0, 0, 0, 0.05)'),
-    fontSize: tokens.fontSizeBase300,
-    fontWeight: tokens.fontWeightSemibold,
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap(tokens.spacingHorizontalS),
+  backgroundColor: tokens.colorNeutralBackground3,
+  cursor: 'grab',
+  },
+  selectionBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '4px',
+    backgroundImage: 'linear-gradient(90deg, #f44336, #ff9800, #ffeb3b, #4caf50, #2196f3, #3f51b5, #9c27b0)',
+    backgroundSize: '400% 100%',
+    animationName: {
+      '0%': { backgroundPosition: '0% 50%' },
+      '50%': { backgroundPosition: '100% 50%' },
+      '100%': { backgroundPosition: '0% 50%' },
+    },
+    animationDuration: '3s',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'linear',
   },
   cardContent: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap(tokens.spacingVerticalM),
-    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalL),
-    flex: 1,
-  },
-  inputGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap(tokens.spacingVerticalXS),
-  },
-  label: {
-    fontSize: tokens.fontSizeBase200,
-    fontWeight: tokens.fontWeightMedium,
-    color: tokens.colorNeutralForeground2,
-  },
-  input: {
-    fontSize: tokens.fontSizeBase200,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
-    '&:focus': {
-      ...shorthands.border("1px", "solid", tokens.colorBrandStroke1),
-      boxShadow: `0 0 0 2px ${tokens.colorBrandStroke1}20`,
-    },
-  },
-  description: {
-    fontSize: tokens.fontSizeBase200,
-    color: tokens.colorNeutralForeground2,
-    lineHeight: tokens.lineHeightBase300,
-    fontStyle: 'italic',
+    ...shorthands.gap(tokens.spacingVerticalS),
+    ...shorthands.padding(tokens.spacingVerticalM),
   },
   nodrag: {
     pointerEvents: 'all',
-    userSelect: 'text',
   },
   handle: {
-    width: '12px',
-    height: '12px',
-    borderRadius: '50%',
-    border: `2px solid ${tokens.colorBrandBorder1}`,
-    backgroundColor: tokens.colorNeutralBackground1,
-    '&:hover': {
-      boxShadow: `0 0 0 3px ${tokens.colorBrandBorder1}40`,
-    },
+    width: '10px',
+    height: '10px',
+  },
+  toggle: {
+    display: 'flex',
+    justifyContent: 'center',
+    ...shorthands.padding(tokens.spacingVerticalXS),
   },
 });
 
@@ -104,6 +69,9 @@ const useStyles = makeStyles({
  */
 interface UserProxyAgentNodeData {
   name: string;
+  systemMessage?: string;
+  expanded?: boolean;
+  [key: string]: any;
 }
 
 /**
@@ -117,38 +85,112 @@ interface UserProxyAgentNodeData {
  * node in a graph, meaning it can only receive input. Therefore, it exclusively
  * features a 'target' handle and has no 'source' handle.
  */
-const UserProxyAgentNode = memo(({ id, data }: NodeProps<UserProxyAgentNodeData>) => {
+const UserProxyAgentNode = memo(({ id, data, selected }: NodeProps<UserProxyAgentNodeData>) => {
   const styles = useStyles();
-  const { name } = data;
+  const updateNodeData = useWorkflowStore(s => s.updateNodeData);
+  const removeNode = useWorkflowStore(s => s.removeNode);
+  const { name, systemMessage = '', expanded } = data as UserProxyAgentNodeData;
+  const extraEntries = useMemo(() => {
+    const omit = new Set(['name','systemMessage','label','icon','agentId','expanded']);
+    return Object.entries(data || {}).filter(([k]) => !omit.has(k));
+  }, [data]);
 
   return (
     <Card className={styles.card}>
+      {selected && <div className={styles.selectionBar} />}
       <Handle
         type="target"
         position={Position.Left}
         className={styles.handle}
       />
-      <CardHeader className={styles.cardHeader}>
-        <span>👤</span>
-        <span>User Proxy Agent</span>
-      </CardHeader>
+      <CardHeader
+        className={`${styles.cardHeader} drag-handle`}
+        header={<b>User Proxy Agent</b>}
+        action={<Button size="small" appearance="subtle" onClick={(e) => { e.stopPropagation(); removeNode(id); }}>✕</Button>}
+      />
       <div className={styles.cardContent}>
-        <div className={styles.description}>
+        <Text>
           A proxy agent for the user. This node is the final recipient of the conversation.
-        </div>
-        
-        <div className={styles.inputGroup}>
-          <Label className={styles.label}>Name</Label>
-          <Input
-            defaultValue={name}
-            className={`${styles.input} ${styles.nodrag}`}
-            placeholder="e.g., Human_Admin"
-            size="small"
-          />
-        </div>
+        </Text>
+        <Label htmlFor={`name-${id}`}>Name</Label>
+        <Input
+          id={`name-${id}`}
+          value={name}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseMove={(e) => e.stopPropagation()}
+          onChange={(e, d) => updateNodeData(id, { name: d.value })}
+          className={styles.nodrag}
+          placeholder="e.g., Human_Admin"
+        />
+        <Label htmlFor={`system-message-${id}`}>Instruction Prompt</Label>
+        <Textarea
+          id={`system-message-${id}`}
+          value={systemMessage}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseMove={(e) => e.stopPropagation()}
+          onChange={(e, d) => updateNodeData(id, { systemMessage: d.value })}
+          className={styles.nodrag}
+          placeholder="Guidance for the human-in-the-loop stage..."
+          rows={4}
+          resize="vertical"
+        />
+        {expanded && extraEntries.length > 0 && (
+          <>
+      {extraEntries.map(([key, value]) => (
+              <div key={key}>
+        <Label htmlFor={`${key}-${id}`}>{key.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase())}</Label>
+                {typeof value === 'number' ? (
+                  <Input
+                    id={`${key}-${id}`}
+                    type="number"
+                    value={String(value)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseMove={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onPointerUp={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e, d) => {
+                      const v = d.value.trim();
+                      updateNodeData(id, { [key]: v === '' ? '' : Number(v) });
+                    }}
+                    className={styles.nodrag}
+                  />
+                ) : typeof value === 'string' ? (
+                  key.toLowerCase().includes('message') || key.toLowerCase().includes('context') || key.toLowerCase().includes('prompt') ? (
+                    <Textarea
+                      id={`${key}-${id}`}
+                      value={value as string}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onMouseMove={(e) => e.stopPropagation()}
+                      onChange={(e, d) => updateNodeData(id, { [key]: d.value })}
+                      className={styles.nodrag}
+                      rows={3}
+                      resize="vertical"
+                    />
+                  ) : (
+                    <Input
+                      id={`${key}-${id}`}
+                      value={value as string}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onMouseMove={(e) => e.stopPropagation()}
+                      onChange={(e, d) => updateNodeData(id, { [key]: d.value })}
+                      className={styles.nodrag}
+                    />
+                  )
+                ) : null}
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+      <div className={styles.toggle}>
+        <Button appearance="subtle" size="small" icon={expanded ? <ChevronUp24Regular/> : <ChevronDown24Regular/>} onClick={() => updateNodeData(id, { expanded: !expanded })}>
+          {expanded ? 'Collapse' : 'Expand'}
+        </Button>
       </div>
     </Card>
   );
 });
 
+UserProxyAgentNode.displayName = 'UserProxyAgentNode';
 export default UserProxyAgentNode;

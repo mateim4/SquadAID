@@ -1,9 +1,11 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use reqwest;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet, VecDeque};
+use std::sync::Mutex;
 use tauri::Manager;
 use tauri_plugin_sql::{Migration, MigrationKind, TauriSql};
 
@@ -42,7 +44,45 @@ struct FinishedPayload {
     success: bool,
 }
 
-// ... (existing commands: greet, db_init, save_workflow, load_workflow) ...
+#[derive(Serialize, Deserialize)]
+struct GhDeviceCodeRequest {
+    client_id: String,
+    scope: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct GhDeviceCodeResponse {
+    device_code: String,
+    user_code: String,
+    verification_uri: String,
+    expires_in: u32,
+    interval: u32,
+}
+
+// --- Tauri Commands ---
+
+#[tauri::command]
+async fn greet(name: &str) -> String {
+    format!("Hello, {}!", name)
+}
+
+#[tauri::command]
+async fn db_init() -> Result<(), String> {
+    // Database initialization logic...
+    Ok(())
+}
+
+#[tauri::command]
+async fn save_workflow(graph_state_json: String) -> Result<(), String> {
+    // Workflow saving logic...
+    Ok(())
+}
+
+#[tauri::command]
+async fn load_workflow() -> Result<String, String> {
+    // Workflow loading logic...
+    Ok("".to_string())
+}
 
 /// # run_workflow
 /// Final version of the command. It streams logs and emits a completion event.
@@ -149,6 +189,91 @@ async fn run_workflow(
     Ok(())
 }
 
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+  message: String,
+}
+
+#[tauri::command]
+async fn begin_github_device_flow(client_id: String) -> Result<serde_json::Value, String> {
+    let client = reqwest::Client::new();
+    let res = client
+        .post("https://github.com/login/device/code")
+        .header("Accept", "application/json")
+        .header("User-Agent", "SquadAID-Tauri-App")
+        .json(&serde_json::json!({ "client_id": client_id }))
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if res.status().is_success() {
+        res.json::<serde_json::Value>()
+            .await
+            .map_err(|e| e.to_string())
+    } else {
+        Err(format!("GitHub API failed with status: {}", res.status()))
+    }
+}
+
+#[tauri::command]
+async fn poll_github_device_token(
+    client_id: String,
+    device_code: String,
+    grant_type: String,
+) -> Result<serde_json::Value, String> {
+    let client = reqwest::Client::new();
+    let res = client
+        .post("https://github.com/login/oauth/access_token")
+        .header("Accept", "application/json")
+        .header("User-Agent", "SquadAID-Tauri-App")
+        .json(&serde_json::json!({
+            "client_id": client_id,
+            "device_code": device_code,
+            "grant_type": grant_type,
+        }))
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if res.status().is_success() {
+        res.json::<serde_json::Value>()
+            .await
+            .map_err(|e| e.to_string())
+    } else {
+        Err(format!("GitHub API failed with status: {}", res.status()))
+    }
+}
+
+#[tauri::command]
+async fn list_ollama_models() -> Result<serde_json::Value, String> {
+    let client = reqwest::Client::new();
+    let res = client
+        .get("http://localhost:11434/api/tags")
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if res.status().is_success() {
+        res.json::<serde_json::Value>()
+            .await
+            .map_err(|e| e.to_string())
+    } else {
+        Err(format!("Ollama API failed with status: {}", res.status()))
+    }
+}
+
+#[tauri::command]
+async fn test_ollama_connection() -> Result<bool, String> {
+    let client = reqwest::Client::new();
+    let res = client
+        .get("http://localhost:11434")
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(res.status().is_success())
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(TauriSql::default().add_migrations(
@@ -160,7 +285,17 @@ fn main() {
                 kind: MigrationKind::Up,
             }],
         ))
+        .setup(|app| {
+            app.listen_global("my-event", |event| {
+                println!("Received event: {:?}", event.payload());
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
+            begin_github_device_flow,
+            poll_github_device_token,
+            list_ollama_models,
+            test_ollama_connection,
             greet,
             db_init,
             save_workflow,

@@ -23,8 +23,7 @@ export interface FlowState {
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
   setFlow: (flow: { nodes: Node[]; edges: Edge[]; viewport: Viewport }) => void;
-  addNode: (node: Node) => void;
-  updateNodeData: (nodeId: string, data: any) => void;
+  addNode: (node: Node) => void; // Add the new action type
   saveFlow: () => void;
 }
 
@@ -67,41 +66,13 @@ const useFlowStore = create<FlowState>((set, get) => ({
     set((state) => ({ nodes: [...state.nodes, node] }));
   },
 
-  /**
-   * Updates the data of a specific node by ID.
-   * Creates a new object to trigger a re-render with proper immutable updates.
-   */
-  updateNodeData: (nodeId: string, data: any) => {
-    set({
-      nodes: get().nodes.map((node) => {
-        if (node.id === nodeId) {
-          // It's important to create a new object to trigger a re-render
-          return { ...node, data: { ...node.data, ...data } };
-        }
-        return node;
-      }),
-    });
-  },
-
   saveFlow: () => {
     const { nodes, edges, viewport } = get();
     const graphState = { nodes, edges, viewport };
-    
-    // Check if we're running in Tauri (desktop) or web mode
-    if (typeof window !== 'undefined' && window.__TAURI_IPC__) {
-      invoke('save_workflow', {
-        id: 1,
-        graphStateJson: JSON.stringify(graphState),
-      }).catch(console.error);
-    } else {
-      // In web mode, save to localStorage as fallback
-      try {
-        localStorage.setItem('workflow_backup', JSON.stringify(graphState));
-        console.log('Workflow saved to localStorage (web dev mode)');
-      } catch (err) {
-        console.warn('Could not save to localStorage:', err);
-      }
-    }
+    invoke('save_workflow', {
+      id: 1,
+      graphStateJson: JSON.stringify(graphState),
+    }).catch(console.error);
   },
 }));
 
