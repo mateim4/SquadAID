@@ -63,7 +63,8 @@
       "Read(/home/mateim/DevApps/TeamAID/agent-orchestrator-studio/src/state/**)",
       "Read(/home/mateim/DevApps/TeamAID/agent-orchestrator-studio/src/hooks/**)",
       "Bash(npm run build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm run test:*)"
     ],
     "deny": [],
     "ask": []

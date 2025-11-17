@@ -20,13 +20,15 @@ import { useNavigationStore, View } from './store/navigation';
 import BuilderPage from './pages/BuilderPage';
 import PlaygroundPage from './pages/PlaygroundPage';
 import SettingsPage from './pages/SettingsPage';
+import WeatherBackground from './components/WeatherBackground';
+import './App.css';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
-    background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 50%, #e8f2ff 100%)',
+    background: tokens.colorNeutralBackground1,
     fontFamily: tokens.fontFamilyBase,
     position: 'relative',
     '&::before': {
@@ -36,8 +38,9 @@ const useStyles = makeStyles({
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.06) 0%, transparent 50%)',
+      background: `radial-gradient(circle at 30% 20%, ${tokens.colorBrandBackground}15 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${tokens.colorBrandBackground2}10 0%, transparent 50%), radial-gradient(circle at 60% 60%, ${tokens.colorBrandBackground3}08 0%, transparent 40%)`,
       pointerEvents: 'none',
+      animation: 'gradientShift 30s ease-in-out infinite',
     },
   },
   titleBar: {
@@ -45,13 +48,24 @@ const useStyles = makeStyles({
     justifyContent: 'space-between',
     alignItems: 'center',
     ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalXL),
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    ...shorthands.borderBottom('1px', 'solid', 'rgba(0, 0, 0, 0.05)'),
-    backdropFilter: 'blur(40px) saturate(1.8)',
-    WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke2),
+    backdropFilter: 'blur(60px) saturate(200%)',
+    WebkitBackdropFilter: 'blur(60px) saturate(200%)',
     position: 'relative',
     zIndex: 100,
-    boxShadow: '0 0 0 0.5px rgba(255, 255, 255, 0.8), 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.08)',
+    boxShadow: `0 0 0 0.5px ${tokens.colorNeutralStroke1}, 0 2px 8px ${tokens.colorNeutralShadowAmbient}, 0 8px 32px ${tokens.colorNeutralShadowKey}, inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.05)`,
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      right: '0',
+      bottom: '0',
+      background: `linear-gradient(90deg, transparent 0%, ${tokens.colorBrandBackground}06 25%, ${tokens.colorBrandBackground}08 50%, ${tokens.colorBrandBackground}06 75%, transparent 100%)`,
+      pointerEvents: 'none',
+      opacity: 0.4,
+    },
   },
   branding: {
     display: 'flex',
@@ -61,6 +75,30 @@ const useStyles = makeStyles({
   brandIcon: {
     color: tokens.colorBrandForeground1,
     fontSize: '28px',
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
+    filter: `drop-shadow(0 2px 8px ${tokens.colorBrandShadowAmbient})`,
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      width: '0px',
+      height: '0px',
+      background: `radial-gradient(circle, ${tokens.colorBrandBackground}20, transparent 70%)`,
+      borderRadius: '50%',
+      transform: 'translate(-50%, -50%)',
+      transition: 'all 0.5s ease-out',
+      zIndex: -1,
+    },
+    '&:hover': {
+      transform: 'scale(1.1) rotate(360deg)',
+      filter: `drop-shadow(0 4px 16px ${tokens.colorBrandShadowKey})`,
+      '&::before': {
+        width: '60px',
+        height: '60px',
+      },
+    },
   },
   brandTitle: {
     color: tokens.colorNeutralForeground1,
@@ -88,9 +126,63 @@ const useStyles = makeStyles({
     minWidth: 'auto',
     width: '36px',
     height: '36px',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
+    overflow: 'hidden',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      width: '0px',
+      height: '0px',
+      background: `radial-gradient(circle, ${tokens.colorBrandBackground}30, transparent 70%)`,
+      borderRadius: '50%',
+      transform: 'translate(-50%, -50%)',
+      transition: 'all 0.4s ease-out',
+      zIndex: -1,
+    },
+    '&:hover': {
+      transform: 'scale(1.05)',
+      boxShadow: `0 4px 12px ${tokens.colorBrandShadowAmbient}`,
+      '&::before': {
+        width: '60px',
+        height: '60px',
+      },
+    },
+    '&:active': {
+      transform: 'scale(0.95)',
+    },
   },
   settingsButton: {
     minWidth: 'auto',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
+    overflow: 'hidden',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      width: '0px',
+      height: '0px',
+      background: `radial-gradient(circle, ${tokens.colorBrandBackground}25, transparent 70%)`,
+      borderRadius: '50%',
+      transform: 'translate(-50%, -50%)',
+      transition: 'all 0.4s ease-out',
+      zIndex: -1,
+    },
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: `0 6px 16px ${tokens.colorBrandShadowAmbient}`,
+      '&::before': {
+        width: '80px',
+        height: '80px',
+      },
+    },
+    '&:active': {
+      transform: 'translateY(0px) scale(0.98)',
+    },
   },
 });
 
@@ -122,11 +214,12 @@ function App() {
 
   return (
     <FluentProvider theme={theme}>
+      <WeatherBackground />
       <div className={styles.container}>
         <div className={styles.titleBar}>
           <div className={styles.branding}>
             <BotSparkle24Regular className={styles.brandIcon} />
-            <Title2 className={styles.brandTitle}>SquadAID</Title2>
+            <Title2 className={styles.brandTitle}>SquladAID</Title2>
           </div>
 
           <div className={styles.navigation}>

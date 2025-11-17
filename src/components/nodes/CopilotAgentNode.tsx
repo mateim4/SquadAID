@@ -26,7 +26,6 @@ const useStyles = makeStyles({
     position: 'relative',
     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     '&:hover': {
-      transform: 'translateY(-4px)',
       boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1)',
     },
     '&::before': {

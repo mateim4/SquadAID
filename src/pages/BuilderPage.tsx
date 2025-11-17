@@ -20,6 +20,8 @@ import JulesAgentNode from '../components/nodes/JulesAgentNode';
 import CopilotAgentNode from '../components/nodes/CopilotAgentNode';
 import CustomAgentNode from '../components/nodes/CustomAgentNode';
 import Palette from '../components/Palette'; // Import the new Palette component
+import WorkflowLibrary from '../components/WorkflowLibrary';
+import MinimapNode from '../components/MinimapNode';
 
 import 'reactflow/dist/style.css';
 import './BuilderPage.css';
@@ -71,6 +73,18 @@ const BuilderPageContent = memo(() => {
     event.dataTransfer.dropEffect = 'move';
   };
 
+  const onNodeDragStart = (event: any, node: any) => {
+    console.log('Node drag started:', node.id);
+  };
+
+  const onNodeDrag = (event: any, node: any) => {
+    console.log('Node dragging:', node.id);
+  };
+
+  const onNodeDragStop = (event: any, node: any) => {
+    console.log('Node drag stopped:', node.id);
+  };
+
   /**
    * Handles the drop event when a node from the palette is dropped on the canvas.
    *
@@ -86,7 +100,10 @@ const BuilderPageContent = memo(() => {
     event.preventDefault();
 
     const type = event.dataTransfer.getData('application/reactflow');
+    console.log('Drop event triggered, type:', type);
+    
     if (!type) {
+      console.log('No type found in dataTransfer');
       return;
     }
 
@@ -94,6 +111,8 @@ const BuilderPageContent = memo(() => {
       x: event.clientX,
       y: event.clientY,
     });
+    
+    console.log('Drop position:', position);
 
     // Convert node type to agent config type for type safety
     const getAgentConfigType = (nodeType: string): AgentConfig['type'] => {
@@ -133,34 +152,43 @@ const BuilderPageContent = memo(() => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeDragStart={onNodeDragStart}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
+        nodesDraggable={true}
+        nodesConnectable={true}
+        elementsSelectable={true}
         fitView
       >
         <Controls />
         <MiniMap 
-          nodeColor="#3b82f6"
-          nodeStrokeWidth={3}
+          nodeComponent={MinimapNode}
           position="bottom-right"
-          style={{
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            overflow: 'hidden'
-          }}
+          zoomable
+          pannable
+          maskColor="rgba(99, 102, 241, 0.1)"
+          maskStrokeColor="#6366f1"
+          maskStrokeWidth={2}
         />
-        <Background gap={12} size={1} />
+        <Background 
+          gap={20} 
+          size={0.5} 
+          color="rgba(0, 123, 255, 0.1)"
+          variant="dots"
+        />
       </ReactFlow>
     </div>
   );
 });
 
-// The main layout now includes the Palette alongside the canvas.
-// The outer div uses display: flex to position them side-by-side.
+// The main layout now includes the Palette on the left, canvas in the middle, and WorkflowLibrary on the right
 const BuilderPage = () => (
   <div className="builder-page-main">
     <ReactFlowProvider>
       <Palette />
       <BuilderPageContent />
+      <WorkflowLibrary />
     </ReactFlowProvider>
   </div>
 );
