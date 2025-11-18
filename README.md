@@ -2,6 +2,10 @@
 
 A collaborative agent teaming platform built with React, TypeScript, and Tauri. SquadAID enables teams to orchestrate AI agents for complex workflows and real-time collaboration.
 
+## Documentation
+
+📚 **[Architecture Documentation](./docs/ARCHITECTURE.md)** - Comprehensive guide to the system architecture, data model, and agent interaction patterns.
+
 ## Features
 
 - **Visual Agent Orchestration**: Drag-and-drop interface for building agent workflows
