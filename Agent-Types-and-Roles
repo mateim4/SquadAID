@@ -1,0 +1,37 @@
+By type:
+- Local Ollama instance
+- Local Ollama alternatives instance
+- Local MSTY instance
+- Local Claude Code instance
+- Local Gemini-CLI instance
+- Local GH Copilot instance
+- Remote API-based major LLM providers (Google, Anthropic, OpenAI, Deepseek, Alibaba)
+- Remote API-based LLM Providers (OpenRouter, HuggingFace, LiteLLM, Requesty, Google Vertex AI, Dataiku, Taam Cloud)
+- Remote web-based End-User AI Subscriptions: Github Copilot Code Browser chat and Agents bridge https://github.com/copilot/agents) ; Google Gemini 2.5 Pro bridge (browser chat), Claude Sonnet 4 and Opus 4.1 bridge (browser chat)
+
+
+By role:
+- Architect Mastermind - This agent is a highly technical CTO-level business and technical expert, with extensive experience in IT Infrastructure (on-premises and cloud). The Architect Mastermind orchestrates and evaluates the implementation of every single change in the process and environment by validating them with the user. It aims to gather requirements, limitations and expectations from the user, and to translate them into actual process and infrastructure changes/improvements. It acts like an expert consultant to the user and aims to turn the user's demands into reality. It can orchestrate any other agent when it sees the need to. Aims to think strategically, always regards the current landscape and specificities of the environment/customer. It is also responsible to log and document all changes, new infrastructure layouts (HLD) as well as always keeping track of the current objectives, their status and next steps. It leverages the Project Manager agent to delegate work that, in turn, must be delegated to other agents and actively tracked by the Project Manager.
+- QA Evaluator
+- Coder
+- Project Manager - This agent is tasked by the Architect Mastermind to orchestrate the implementation of various requests by delegating work to the other agents. It must always follow a strict prompt structure that is AI-friendly, including: Task description ; Restrictions and limitations ; Start condition ; End condition ; Success metrics ; Task context (required infrastructure information). For each request, this agent will develop a project plan, including deliverable tasks, their status, next steps and responsible agent. It follows up with the agents regularly to check and update the progress tracker. Provides status to Architect Mastermind when asked to.
+- Infrastructure Engineer
+- Backup Engineer
+- Network Engineer
+- Storage Engineer
+- Automation Engineer
+- Capacity Manager
+- Availability Manager
+- Release Manager
+- Service Manager
+- Incident Manager
+- Change Manager
+- Security Manager
+- Knowledge Manager
+- Test Manager
+- Demand Manager
+- Access Manager
+- Asset Manager
+- CRM/ERP Evaluator - Reviews the tickes (incidents, changes etc) as well as asset database and relationships between assets. Its goal is to evaluate the health of the CRM/ERP data based on 100 randomly chosen tickets and assets of various types from the system. Generates an analysis, locates issues/failures in the current process implementation and highlights them in an executive report.
+- ITIL 4 Master | A highly trained ITIL 4 Master, with extensive experience implementing and improving ITIL frameworks in companies of all sizes. It explores and indexes the current process documentation (Operational Manuals, Process Manuals) in use at the current company. Builds and breaks down the deliverables in ITIL-compliant roles. Generates one instruction prompt for each role required. Describes in detail what the expectation is from the agent, what other agents it must interact with, what the deliverables are, what the activity trigger is and what the end condition is. The ITIL 4 Master has three goals: 1 - evaluating the current framework implementation in the company, finding issues and suggesting improvements 2 - preparing the other agents' prompts based on its findings 3 - evaluating the agent performance in the ITIL role as soon as one task is completed.
+- 4 - Suggests and implements process improvement based on the CRM/ERP Evaluator's analysis and feedback, while regarding its own knowledge about the company ITIL implementation processes. Improvements can be new process definitions/updates, as well as providing other agents with positive or negative prompts limiting their behavior to avoid issues identified.

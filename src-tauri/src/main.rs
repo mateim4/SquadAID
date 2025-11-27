@@ -5,6 +5,7 @@ use reqwest;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet, VecDeque};
+use std::process::Command;
 use std::sync::Mutex;
 use tauri::Manager;
 use tauri_plugin_sql::{Migration, MigrationKind, TauriSql};
@@ -274,6 +275,27 @@ async fn test_ollama_connection() -> Result<bool, String> {
     Ok(res.status().is_success())
 }
 
+#[tauri::command]
+async fn run_gemini(prompt: String, model: String) -> Result<String, String> {
+    // Execute gemini-cli
+    // We assume 'gemini' is in the PATH and accepts the prompt as a positional argument
+    // and the model via --model flag.
+    // Example: gemini "Hello world" --model gemini-1.5-pro
+    let output = Command::new("gemini")
+        .arg(&prompt)
+        .arg("--model")
+        .arg(&model)
+        .output()
+        .map_err(|e| format!("Failed to execute gemini: {}", e))?;
+
+    if output.status.success() {
+        String::from_utf8(output.stdout).map_err(|e| format!("Invalid UTF-8: {}", e))
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(format!("Gemini CLI error: {}", stderr))
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(TauriSql::default().add_migrations(
@@ -300,7 +322,8 @@ fn main() {
             db_init,
             save_workflow,
             load_workflow,
-            run_workflow
+            run_workflow,
+            run_gemini
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

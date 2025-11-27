@@ -1,0 +1,13 @@
+dist
+node_modules
+playwright-report
+src-tauri
+nohup.out
+tests
+src/pages
+src/components/layout/nav.tsx
+src/lib
+src/services/architectureService.ts
+src/services/validationService.ts
+src/store/projects.ts
+src/data/mockProjects.ts

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
-import { Title1, Title3, Input, Button, Label, makeStyles, shorthands, tokens, Text, Divider, Toast, ToastTitle, Toaster, useId, useToastController } from '@fluentui/react-components';
+import { Title1, Title3, Input, Button, Label, makeStyles, shorthands, tokens, Text, Divider, Toast, ToastTitle, Toaster, useId, useToastController, Dropdown, Option } from '@fluentui/react-components';
 import { checkSurrealHealth, createWorkflow, getSecret, setSecret, upsertProject } from '@/services/surreal';
 import { getUser, hasGitHubToken } from '@/services/github';
 import GitHubSignIn from '@/components/auth/GitHubSignIn';
@@ -122,6 +122,10 @@ function SettingsPage() {
   const [julesToken, setJulesToken] = useState<string>('');
   const [julesStatus, setJulesStatus] = useState<string>('');
 
+  // Gemini
+  const [geminiModel, setGeminiModel] = useState<string>('gemini-1.5-pro');
+  const [geminiStatus, setGeminiStatus] = useState<string>('');
+
   // Load initial statuses
   useEffect(() => {
     (async () => {
@@ -164,6 +168,7 @@ function SettingsPage() {
       try { const r = await getSecret('google_token'); if ((r.result?.[0]?.value)) setGoogleToken(r.result[0].value as string); } catch {}
       try { const r = await getSecret('claude_token'); if ((r.result?.[0]?.value)) setClaudeToken(r.result[0].value as string); } catch {}
       try { const r = await getSecret('jules_token'); if ((r.result?.[0]?.value)) setJulesToken(r.result[0].value as string); } catch {}
+      try { const r = await getSecret('gemini_model'); if ((r.result?.[0]?.value)) setGeminiModel(r.result[0].value as string); } catch {}
     })();
   }, []);
 
@@ -374,6 +379,49 @@ function SettingsPage() {
                 }}>Save</Button>
               </div>
               <Text size={200}>{julesStatus}</Text>
+            </section>
+
+            {/* Gemini */}
+            <section className={styles.sectionCard} aria-label="Gemini">
+              <Title3>Gemini CLI Agent</Title3>
+              <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>Configure the local Gemini CLI wrapper.</Text>
+              <Label>Select Model</Label>
+              <div className={styles.inlineRow}>
+                <Dropdown
+                  aria-labelledby="gemini-model"
+                  placeholder="Select a model"
+                  value={geminiModel}
+                  onOptionSelect={(_e, data) => setGeminiModel(data.optionValue as string)}
+                >
+                  <Option value="gemini-3-pro">Gemini 3 Pro (Preview)</Option>
+                  <Option value="gemini-2.5-pro">Gemini 2.5 Pro</Option>
+                  <Option value="gemini-2.5-flash">Gemini 2.5 Flash</Option>
+                  <Option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</Option>
+                  <Option value="gemini-2.0-flash">Gemini 2.0 Flash</Option>
+                  <Option value="gemini-1.5-pro">Gemini 1.5 Pro</Option>
+                </Dropdown>
+                <Button data-appearance="primary" appearance="primary" onClick={async () => {
+                  try {
+                    await setSecret('gemini_model', geminiModel);
+                    setGeminiStatus('Saved ✓');
+                    dispatchToast(
+                      <Toast>
+                        <ToastTitle media={<Checkmark24Regular />}>Gemini model saved successfully</ToastTitle>
+                      </Toast>,
+                      { intent: 'success', timeout: 3000 }
+                    );
+                  } catch (err: any) {
+                    setGeminiStatus('Failed to save');
+                    dispatchToast(
+                      <Toast>
+                        <ToastTitle media={<ErrorCircle24Regular />}>Failed to save Gemini model</ToastTitle>
+                      </Toast>,
+                      { intent: 'error', timeout: 5000 }
+                    );
+                  }
+                }}>Save</Button>
+              </div>
+              <Text size={200}>{geminiStatus}</Text>
             </section>
           </div>
         </div>

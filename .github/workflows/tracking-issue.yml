@@ -1,0 +1,67 @@
+name: Update Tracking Issue
+
+on:
+  push:
+    branches:
+      - alternate
+  workflow_dispatch: {}
+
+jobs:
+  update-tracking-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create or update tracking issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = '.github/TRACKING_ISSUE.md';
+            const title = 'SquadAID: Unified Tracking Checklist';
+            const body = fs.readFileSync(path, 'utf8');
+
+            async function findExisting() {
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'all',
+                labels: undefined,
+                per_page: 100,
+              });
+              return issues.data.find(i => i.title === title && !i.pull_request);
+            }
+
+            const labels = ['tracking', 'project'];
+            let existing = await findExisting();
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                title,
+                body,
+                state: 'open',
+              });
+              await github.rest.issues.setLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                labels,
+              });
+              core.info(`Updated issue #${existing.number}`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels,
+              });
+              core.info(`Created issue #${created.data.number}`);
+            }
