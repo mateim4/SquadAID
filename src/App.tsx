@@ -27,11 +27,33 @@ import AnalyticsPage from '@/views/AnalyticsPage';
 import { HealthIndicator } from '@/components/status/HealthIndicator';
 import SettingsPage from '@/pages/SettingsPage';
 import ProjectsPage from '@/pages/ProjectsPage';
+import { initializeFromBackend } from '@/services/syncService';
+import { useRoleStore } from '@/store/roleStore';
 
 const App: React.FC = () => {
     const styles = useStyles();
     const [isDarkTheme, setIsDarkTheme] = useState(true);
     const [selectedTab, setSelectedTab] = useState('team-builder');
+    const [isInitialized, setIsInitialized] = useState(false);
+    const loadBuiltInRoles = useRoleStore((state) => state.loadBuiltInRoles);
+
+    // Initialize stores and load data from backend
+    useEffect(() => {
+        const init = async () => {
+            try {
+                // Load built-in roles first
+                await loadBuiltInRoles();
+                // Then initialize from backend
+                await initializeFromBackend();
+                setIsInitialized(true);
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                setIsInitialized(true); // Continue anyway
+            }
+        };
+        init();
+    }, [loadBuiltInRoles]);
+
     // Sync tab with hash routing (e.g., #/playground)
     useEffect(() => {
         const applyHash = () => {

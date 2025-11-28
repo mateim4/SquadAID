@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { Event, listen } from '@tauri-apps/api/event';
 import { isTauri } from '@/services/platform';
@@ -9,22 +9,55 @@ import {
   shorthands,
   tokens,
   Text,
+  TabList,
+  Tab,
+  SelectTabEvent,
+  SelectTabData,
 } from '@fluentui/react-components';
+import { Play24Regular, Code24Regular, Timeline24Regular } from '@fluentui/react-icons';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { useWorkflowStore } from '@/store/workflowStore';
+import { useInteractionStore } from '@/store/interactionStore';
 import { agents } from '@/data/agents';
+import ExecutionDashboard from '@/components/canvas/ExecutionDashboard';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap(tokens.spacingVerticalL),
+    height: '100%',
+    ...shorthands.overflow('hidden'),
+  },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalL),
+    ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke2),
+  },
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap(tokens.spacingHorizontalM),
+  },
+  content: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.overflow('hidden'),
+  },
+  tabContent: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.overflow('auto'),
   },
   controls: {
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap(tokens.spacingVerticalS),
-    maxWidth: '400px',
+    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalL),
+    maxWidth: '600px',
   },
   console: {
     fontFamily: tokens.fontFamilyMonospace,
@@ -32,8 +65,18 @@ const useStyles = makeStyles({
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground3,
-    minHeight: '200px',
+    minHeight: '300px',
+    maxHeight: '500px',
     whiteSpace: 'pre-wrap',
+    ...shorthands.overflow('auto'),
+    flex: 1,
+  },
+  consoleSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap(tokens.spacingVerticalS),
+    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalL),
+    flex: 1,
   },
 });
 
@@ -45,6 +88,11 @@ function PlaygroundPage() {
   const styles = useStyles();
   const [output, setOutput] = useState<string>('');
   const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [workflowId] = useState<string>(() => `workflow-${Date.now()}`);
+  
+  // Interaction store for clearing on restart
+  const clearWorkflowInteractions = useInteractionStore(s => s.clearWorkflowInteractions);
 
   useEffect(() => {
     if (!isTauri()) return;
@@ -62,7 +110,7 @@ function PlaygroundPage() {
     };
   }, []);
 
-  const handleRun = async () => {
+  const handleRun = useCallback(async () => {
     setIsRunning(true);
     setOutput('');
 
@@ -104,24 +152,90 @@ function PlaygroundPage() {
       setOutput('[Web preview] Tauri runtime not available; skipping native run.');
       setIsRunning(false);
     }
-    // The `finally` block with setTimeout has been removed.
-  };
+  }, []);
 
+  const handlePause = useCallback(() => {
+    // TODO: Implement pause via Tauri command
+    setOutput((prev) => `${prev}\n[Paused execution]\n`);
+  }, []);
+
+  const handleStop = useCallback(async () => {
+    if (isTauri()) {
+      try {
+        await invoke('stop_workflow');
+      } catch (error) {
+        setOutput((prev) => `${prev}\n[Error stopping]: ${error}\n`);
+      }
+    }
+    setIsRunning(false);
+    setOutput((prev) => `${prev}\n[Stopped]\n`);
+  }, []);
+
+  const handleRestart = useCallback(() => {
+    // Clear previous interactions
+    clearWorkflowInteractions(workflowId);
+    setOutput('');
+    handleRun();
+  }, [workflowId, clearWorkflowInteractions, handleRun]);
+
+  const handleTabSelect = useCallback((_: SelectTabEvent, data: SelectTabData) => {
+    setActiveTab(data.value as string);
+  }, []);
   return (
     <div className={styles.container}>
-      <Title1>Playground</Title1>
-      <div className={styles.controls}>
-        <Text>
-          Click the button below to send the current workflow to the Rust backend
-          for real-time execution.
-        </Text>
-            <PrimaryButton onClick={handleRun} disabled={isRunning}>
-              {isRunning ? 'Running...' : 'Run Workflow'}
-            </PrimaryButton>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <Title1>Playground</Title1>
+          <TabList
+            selectedValue={activeTab}
+            onTabSelect={handleTabSelect}
+            size="small"
+          >
+            <Tab value="dashboard" icon={<Timeline24Regular />}>
+              Dashboard
+            </Tab>
+            <Tab value="console" icon={<Code24Regular />}>
+              Console
+            </Tab>
+          </TabList>
+        </div>
+        <PrimaryButton 
+          onClick={handleRun} 
+          disabled={isRunning}
+          icon={<Play24Regular />}
+        >
+          {isRunning ? 'Running...' : 'Run Workflow'}
+        </PrimaryButton>
       </div>
-      <div>
-        <Text weight="semibold">Execution Log</Text>
-        <pre className={styles.console}>{output}</pre>
+
+      {/* Content */}
+      <div className={styles.content}>
+        {activeTab === 'dashboard' && (
+          <ExecutionDashboard
+            workflowId={workflowId}
+            isExecuting={isRunning}
+            onStart={handleRun}
+            onPause={handlePause}
+            onStop={handleStop}
+            onRestart={handleRestart}
+          />
+        )}
+
+        {activeTab === 'console' && (
+          <div className={styles.consoleSection}>
+            <div className={styles.controls}>
+              <Text>
+                Raw execution log from the Rust backend. Switch to Dashboard 
+                for a visual overview of agent interactions.
+              </Text>
+            </div>
+            <Text weight="semibold">Execution Log</Text>
+            <pre className={styles.console}>
+              {output || 'No output yet. Run a workflow to see logs here.'}
+            </pre>
+          </div>
+        )}
       </div>
     </div>
   );

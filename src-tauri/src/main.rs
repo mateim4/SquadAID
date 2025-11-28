@@ -1,6 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod commands;
+mod db;
+mod models;
+
 use reqwest;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -314,6 +318,7 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            // Original commands
             begin_github_device_flow,
             poll_github_device_token,
             list_ollama_models,
@@ -323,7 +328,51 @@ fn main() {
             save_workflow,
             load_workflow,
             run_workflow,
-            run_gemini
+            run_gemini,
+            // Role commands
+            commands::get_roles,
+            commands::get_role,
+            commands::create_role,
+            commands::update_role,
+            commands::delete_role,
+            commands::get_built_in_roles,
+            // Agent commands
+            commands::get_agents,
+            commands::get_agent,
+            commands::create_agent,
+            commands::update_agent,
+            commands::delete_agent,
+            commands::update_agent_status,
+            commands::assign_role_to_agent,
+            commands::get_agents_by_role,
+            // Relationship commands
+            commands::get_relationships,
+            commands::get_relationship,
+            commands::create_relationship,
+            commands::update_relationship,
+            commands::delete_relationship,
+            commands::get_agent_relationships,
+            commands::get_relationships_by_type,
+            // Interaction commands
+            commands::get_interactions,
+            commands::get_workflow_interactions,
+            commands::create_interaction,
+            commands::update_interaction_status,
+            commands::delete_workflow_interactions,
+            commands::get_interaction_stats,
+            // Project commands
+            commands::get_projects,
+            commands::get_project,
+            commands::create_project,
+            commands::update_project,
+            commands::delete_project,
+            commands::get_project_tasks,
+            commands::create_task,
+            commands::update_task,
+            commands::delete_task,
+            commands::get_project_artifacts,
+            commands::create_artifact,
+            commands::delete_artifact
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

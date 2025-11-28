@@ -1,5 +1,31 @@
 import { Node, Edge } from 'reactflow';
 
+// Re-export all enhanced types
+export * from './provider';
+export * from './role';
+export * from './relationship';
+// Export interaction types with proper type exports
+export {
+  InteractionType,
+  createInteraction,
+  expectsResponse,
+  getInteractionLabel,
+  getInteractionIcon,
+} from './interaction';
+export type {
+  InteractionStatus,
+  InteractionResponse,
+  UserIntervention,
+  AgentInteraction,
+  InteractionSummary,
+  InteractionFilters,
+} from './interaction';
+export * from './enhanced-agent';
+export * from './enhanced-project';
+
+/**
+ * @deprecated Use AgentNodeData from enhanced-agent.ts for new implementations
+ */
 export type Agent = {
   id: string;
   name: string;
