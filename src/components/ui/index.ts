@@ -14,3 +14,12 @@ export { default as EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
 export { default as Breadcrumbs } from './Breadcrumbs';
 export type { BreadcrumbsProps, BreadcrumbItem } from './Breadcrumbs';
+export { default as ErrorBoundary } from './ErrorBoundary';
+export { 
+  default as SkeletonLoader, 
+  SkeletonText, 
+  SkeletonCard, 
+  SkeletonList, 
+  SkeletonAvatarText 
+} from './Skeleton';
+export type { SkeletonLoaderProps } from './Skeleton';

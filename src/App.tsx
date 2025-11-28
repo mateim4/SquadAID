@@ -29,7 +29,7 @@ import SettingsPage from '@/pages/SettingsPage';
 import ProjectsPage from '@/pages/ProjectsPage';
 import { initializeFromBackend } from '@/services/syncService';
 import { useRoleStore } from '@/store/roleStore';
-import { SkipLink } from '@/components/ui';
+import { SkipLink, ErrorBoundary } from '@/components/ui';
 import { iconSizes } from '@/styles/designTokens';
 
 const App: React.FC = () => {
@@ -117,6 +117,7 @@ const App: React.FC = () => {
                                         </header>
 
                     <main id="main-content" className={styles.mainContent} role="main">
+                        <ErrorBoundary>
                         {selectedTab === 'team-builder' && (
                             <>
                                 <AgentLibrary />
@@ -140,6 +141,7 @@ const App: React.FC = () => {
                         {selectedTab === 'playground' && <PlaygroundPage />}
                         {selectedTab === 'analytics' && <AnalyticsPage />}
                         {selectedTab === 'settings' && <SettingsPage />}
+                        </ErrorBoundary>
                     </main>
                 </div>
             </div>
