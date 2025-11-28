@@ -8,9 +8,9 @@ mod models;
 use reqwest;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use sqlx::SqlitePool;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::process::Command;
-use std::sync::Mutex;
 use tauri::Manager;
 use tauri_plugin_sql::{Migration, MigrationKind};
 
@@ -300,6 +300,20 @@ async fn run_gemini(prompt: String, model: String) -> Result<String, String> {
     }
 }
 
+/// Initialize the database pool and run migrations
+async fn init_database(app_handle: &tauri::AppHandle) -> Result<SqlitePool, String> {
+    let db_path = db::get_db_path(app_handle)?;
+    println!("Database path: {:?}", db_path);
+    
+    let pool = db::create_pool(&db_path).await?;
+    println!("Database pool created");
+    
+    db::init_database(&pool).await?;
+    println!("Database migrations complete");
+    
+    Ok(pool)
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::Builder::default().add_migrations(
@@ -312,6 +326,21 @@ fn main() {
             }],
         ).build())
         .setup(|app| {
+            let app_handle = app.handle();
+            
+            // Initialize database asynchronously
+            tauri::async_runtime::spawn(async move {
+                match init_database(&app_handle).await {
+                    Ok(pool) => {
+                        app_handle.manage(pool);
+                        println!("Database initialized successfully");
+                    }
+                    Err(e) => {
+                        eprintln!("Failed to initialize database: {}", e);
+                    }
+                }
+            });
+            
             app.listen_global("my-event", |event| {
                 println!("Received event: {:?}", event.payload());
             });
