@@ -3,6 +3,7 @@
 //! Projects contain workflows, tasks, and artifacts produced by agents.
 
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
 /// Task status
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -256,7 +257,7 @@ impl EnhancedProject {
 
 // Database row types
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ProjectRow {
     pub id: String,
     pub name: String,
@@ -309,7 +310,7 @@ impl TryFrom<ProjectRow> for EnhancedProject {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct TaskRow {
     pub id: String,
     pub project_id: String,
@@ -383,7 +384,7 @@ impl TryFrom<TaskRow> for ProjectTask {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ArtifactRow {
     pub id: String,
     pub project_id: String,

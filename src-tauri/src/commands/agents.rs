@@ -7,15 +7,12 @@ use tauri::State;
 /// Get all agents
 #[tauri::command]
 pub async fn get_agents(pool: State<'_, SqlitePool>) -> Result<Vec<EnhancedAgent>, String> {
-    let rows: Vec<AgentRow> = sqlx::query_as!(
-        AgentRow,
+    let rows: Vec<AgentRow> = sqlx::query_as::<_, AgentRow>(
         r#"
         SELECT 
             id, name, description, role_id, mode, status,
             provider_config_json, system_prompt_override, metrics_json,
-            position_x, position_y, 
-            expanded as "expanded: bool", 
-            selected as "selected: bool",
+            position_x, position_y, expanded, selected,
             created_at, updated_at
         FROM agents
         ORDER BY name
@@ -33,21 +30,18 @@ pub async fn get_agents(pool: State<'_, SqlitePool>) -> Result<Vec<EnhancedAgent
 /// Get a single agent by ID
 #[tauri::command]
 pub async fn get_agent(pool: State<'_, SqlitePool>, id: String) -> Result<Option<EnhancedAgent>, String> {
-    let row: Option<AgentRow> = sqlx::query_as!(
-        AgentRow,
+    let row: Option<AgentRow> = sqlx::query_as::<_, AgentRow>(
         r#"
         SELECT 
             id, name, description, role_id, mode, status,
             provider_config_json, system_prompt_override, metrics_json,
-            position_x, position_y,
-            expanded as "expanded: bool",
-            selected as "selected: bool",
+            position_x, position_y, expanded, selected,
             created_at, updated_at
         FROM agents
         WHERE id = ?
-        "#,
-        id
+        "#
     )
+    .bind(&id)
     .fetch_optional(pool.inner())
     .await
     .map_err(|e| format!("Failed to fetch agent: {}", e))?;
@@ -63,7 +57,7 @@ pub async fn get_agent(pool: State<'_, SqlitePool>, id: String) -> Result<Option
 pub async fn create_agent(pool: State<'_, SqlitePool>, agent: EnhancedAgent) -> Result<EnhancedAgent, String> {
     let row = AgentRow::from(agent.clone());
     
-    sqlx::query!(
+    sqlx::query(
         r#"
         INSERT INTO agents (
             id, name, description, role_id, mode, status,
@@ -71,23 +65,23 @@ pub async fn create_agent(pool: State<'_, SqlitePool>, agent: EnhancedAgent) -> 
             position_x, position_y, expanded, selected,
             created_at, updated_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        "#,
-        row.id,
-        row.name,
-        row.description,
-        row.role_id,
-        row.mode,
-        row.status,
-        row.provider_config_json,
-        row.system_prompt_override,
-        row.metrics_json,
-        row.position_x,
-        row.position_y,
-        row.expanded,
-        row.selected,
-        row.created_at,
-        row.updated_at
+        "#
     )
+    .bind(&row.id)
+    .bind(&row.name)
+    .bind(&row.description)
+    .bind(&row.role_id)
+    .bind(&row.mode)
+    .bind(&row.status)
+    .bind(&row.provider_config_json)
+    .bind(&row.system_prompt_override)
+    .bind(&row.metrics_json)
+    .bind(row.position_x)
+    .bind(row.position_y)
+    .bind(row.expanded)
+    .bind(row.selected)
+    .bind(&row.created_at)
+    .bind(&row.updated_at)
     .execute(pool.inner())
     .await
     .map_err(|e| format!("Failed to create agent: {}", e))?;
@@ -101,7 +95,7 @@ pub async fn update_agent(pool: State<'_, SqlitePool>, agent: EnhancedAgent) -> 
     let row = AgentRow::from(agent.clone());
     let updated_at = chrono::Utc::now().to_rfc3339();
 
-    sqlx::query!(
+    sqlx::query(
         r#"
         UPDATE agents SET
             name = ?, description = ?, role_id = ?, mode = ?, status = ?,
@@ -109,22 +103,22 @@ pub async fn update_agent(pool: State<'_, SqlitePool>, agent: EnhancedAgent) -> 
             position_x = ?, position_y = ?, expanded = ?, selected = ?,
             updated_at = ?
         WHERE id = ?
-        "#,
-        row.name,
-        row.description,
-        row.role_id,
-        row.mode,
-        row.status,
-        row.provider_config_json,
-        row.system_prompt_override,
-        row.metrics_json,
-        row.position_x,
-        row.position_y,
-        row.expanded,
-        row.selected,
-        updated_at,
-        row.id
+        "#
     )
+    .bind(&row.name)
+    .bind(&row.description)
+    .bind(&row.role_id)
+    .bind(&row.mode)
+    .bind(&row.status)
+    .bind(&row.provider_config_json)
+    .bind(&row.system_prompt_override)
+    .bind(&row.metrics_json)
+    .bind(row.position_x)
+    .bind(row.position_y)
+    .bind(row.expanded)
+    .bind(row.selected)
+    .bind(&updated_at)
+    .bind(&row.id)
     .execute(pool.inner())
     .await
     .map_err(|e| format!("Failed to update agent: {}", e))?;
@@ -135,7 +129,8 @@ pub async fn update_agent(pool: State<'_, SqlitePool>, agent: EnhancedAgent) -> 
 /// Delete an agent
 #[tauri::command]
 pub async fn delete_agent(pool: State<'_, SqlitePool>, id: String) -> Result<(), String> {
-    sqlx::query!("DELETE FROM agents WHERE id = ?", id)
+    sqlx::query("DELETE FROM agents WHERE id = ?")
+        .bind(&id)
         .execute(pool.inner())
         .await
         .map_err(|e| format!("Failed to delete agent: {}", e))?;
@@ -153,15 +148,13 @@ pub async fn update_agent_status(
     let status_json = serde_json::to_string(&status).map_err(|e| e.to_string())?;
     let updated_at = chrono::Utc::now().to_rfc3339();
 
-    sqlx::query!(
-        "UPDATE agents SET status = ?, updated_at = ? WHERE id = ?",
-        status_json,
-        updated_at,
-        id
-    )
-    .execute(pool.inner())
-    .await
-    .map_err(|e| format!("Failed to update agent status: {}", e))?;
+    sqlx::query("UPDATE agents SET status = ?, updated_at = ? WHERE id = ?")
+        .bind(&status_json)
+        .bind(&updated_at)
+        .bind(&id)
+        .execute(pool.inner())
+        .await
+        .map_err(|e| format!("Failed to update agent status: {}", e))?;
 
     Ok(())
 }
@@ -175,15 +168,13 @@ pub async fn assign_role_to_agent(
 ) -> Result<(), String> {
     let updated_at = chrono::Utc::now().to_rfc3339();
 
-    sqlx::query!(
-        "UPDATE agents SET role_id = ?, updated_at = ? WHERE id = ?",
-        role_id,
-        updated_at,
-        agent_id
-    )
-    .execute(pool.inner())
-    .await
-    .map_err(|e| format!("Failed to assign role: {}", e))?;
+    sqlx::query("UPDATE agents SET role_id = ?, updated_at = ? WHERE id = ?")
+        .bind(&role_id)
+        .bind(&updated_at)
+        .bind(&agent_id)
+        .execute(pool.inner())
+        .await
+        .map_err(|e| format!("Failed to assign role: {}", e))?;
 
     Ok(())
 }
@@ -194,22 +185,19 @@ pub async fn get_agents_by_role(
     pool: State<'_, SqlitePool>,
     role_id: String,
 ) -> Result<Vec<EnhancedAgent>, String> {
-    let rows: Vec<AgentRow> = sqlx::query_as!(
-        AgentRow,
+    let rows: Vec<AgentRow> = sqlx::query_as::<_, AgentRow>(
         r#"
         SELECT 
             id, name, description, role_id, mode, status,
             provider_config_json, system_prompt_override, metrics_json,
-            position_x, position_y,
-            expanded as "expanded: bool",
-            selected as "selected: bool",
+            position_x, position_y, expanded, selected,
             created_at, updated_at
         FROM agents
         WHERE role_id = ?
         ORDER BY name
-        "#,
-        role_id
+        "#
     )
+    .bind(&role_id)
     .fetch_all(pool.inner())
     .await
     .map_err(|e| format!("Failed to fetch agents by role: {}", e))?;

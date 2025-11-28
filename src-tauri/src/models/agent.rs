@@ -4,6 +4,7 @@
 //! Each agent has a role, capabilities, and can interact with other agents.
 
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
 /// Operating modes for agents
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -250,7 +251,7 @@ impl EnhancedAgent {
 }
 
 /// For database storage
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct AgentRow {
     pub id: String,
     pub name: String,

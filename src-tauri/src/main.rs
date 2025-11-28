@@ -12,7 +12,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use std::process::Command;
 use std::sync::Mutex;
 use tauri::Manager;
-use tauri_plugin_sql::{Migration, MigrationKind, TauriSql};
+use tauri_plugin_sql::{Migration, MigrationKind};
 
 // --- Data Structures ---
 
@@ -67,8 +67,8 @@ struct GhDeviceCodeResponse {
 // --- Tauri Commands ---
 
 #[tauri::command]
-async fn greet(name: &str) -> String {
-    format!("Hello, {}!", name)
+async fn greet(name: &str) -> Result<String, String> {
+    Ok(format!("Hello, {}!", name))
 }
 
 #[tauri::command]
@@ -302,7 +302,7 @@ async fn run_gemini(prompt: String, model: String) -> Result<String, String> {
 
 fn main() {
     tauri::Builder::default()
-        .plugin(TauriSql::default().add_migrations(
+        .plugin(tauri_plugin_sql::Builder::default().add_migrations(
             "sqlite:app_data.db",
             vec![Migration {
                 version: 1,
@@ -310,7 +310,7 @@ fn main() {
                 sql: "",
                 kind: MigrationKind::Up,
             }],
-        ))
+        ).build())
         .setup(|app| {
             app.listen_global("my-event", |event| {
                 println!("Received event: {:?}", event.payload());

@@ -4,6 +4,7 @@
 //! of agents in the system.
 
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
 /// Capability categories that a role can possess
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -134,7 +135,7 @@ impl Role {
 }
 
 /// For database storage - flattened role representation
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct RoleRow {
     pub id: String,
     pub name: String,

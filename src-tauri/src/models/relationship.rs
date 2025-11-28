@@ -4,6 +4,7 @@
 //! including communication patterns and authority hierarchies.
 
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
 /// Types of relationships between agents
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -143,7 +144,7 @@ impl AgentRelationship {
 }
 
 /// For database storage
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct RelationshipRow {
     pub id: String,
     pub source_agent_id: String,

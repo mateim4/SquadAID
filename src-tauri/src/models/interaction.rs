@@ -4,6 +4,7 @@
 //! enabling replay, debugging, and analytics.
 
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
 /// Types of interactions between agents
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -206,7 +207,7 @@ impl AgentInteraction {
 }
 
 /// For database storage
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct InteractionRow {
     pub id: String,
     pub workflow_id: String,

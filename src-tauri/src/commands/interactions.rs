@@ -7,14 +7,12 @@ use tauri::State;
 /// Get all interactions
 #[tauri::command]
 pub async fn get_interactions(pool: State<'_, SqlitePool>) -> Result<Vec<AgentInteraction>, String> {
-    let rows: Vec<InteractionRow> = sqlx::query_as!(
-        InteractionRow,
+    let rows: Vec<InteractionRow> = sqlx::query_as::<_, InteractionRow>(
         r#"
         SELECT 
             id, workflow_id, initiator_agent_id, target_agent_ids_json,
             interaction_type, status, priority, content_json,
-            related_task_id, parent_interaction_id,
-            duration_ms as "duration_ms: i64",
+            related_task_id, parent_interaction_id, duration_ms,
             created_at, completed_at
         FROM interactions
         ORDER BY created_at DESC
@@ -36,21 +34,19 @@ pub async fn get_workflow_interactions(
     pool: State<'_, SqlitePool>,
     workflow_id: String,
 ) -> Result<Vec<AgentInteraction>, String> {
-    let rows: Vec<InteractionRow> = sqlx::query_as!(
-        InteractionRow,
+    let rows: Vec<InteractionRow> = sqlx::query_as::<_, InteractionRow>(
         r#"
         SELECT 
             id, workflow_id, initiator_agent_id, target_agent_ids_json,
             interaction_type, status, priority, content_json,
-            related_task_id, parent_interaction_id,
-            duration_ms as "duration_ms: i64",
+            related_task_id, parent_interaction_id, duration_ms,
             created_at, completed_at
         FROM interactions
         WHERE workflow_id = ?
         ORDER BY created_at ASC
-        "#,
-        workflow_id
+        "#
     )
+    .bind(&workflow_id)
     .fetch_all(pool.inner())
     .await
     .map_err(|e| format!("Failed to fetch workflow interactions: {}", e))?;
@@ -68,7 +64,7 @@ pub async fn create_interaction(
 ) -> Result<AgentInteraction, String> {
     let row = InteractionRow::from(interaction.clone());
     
-    sqlx::query!(
+    sqlx::query(
         r#"
         INSERT INTO interactions (
             id, workflow_id, initiator_agent_id, target_agent_ids_json,
@@ -76,21 +72,21 @@ pub async fn create_interaction(
             related_task_id, parent_interaction_id, duration_ms,
             created_at, completed_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        "#,
-        row.id,
-        row.workflow_id,
-        row.initiator_agent_id,
-        row.target_agent_ids_json,
-        row.interaction_type,
-        row.status,
-        row.priority,
-        row.content_json,
-        row.related_task_id,
-        row.parent_interaction_id,
-        row.duration_ms,
-        row.created_at,
-        row.completed_at
+        "#
     )
+    .bind(&row.id)
+    .bind(&row.workflow_id)
+    .bind(&row.initiator_agent_id)
+    .bind(&row.target_agent_ids_json)
+    .bind(&row.interaction_type)
+    .bind(&row.status)
+    .bind(&row.priority)
+    .bind(&row.content_json)
+    .bind(&row.related_task_id)
+    .bind(&row.parent_interaction_id)
+    .bind(row.duration_ms)
+    .bind(&row.created_at)
+    .bind(&row.completed_at)
     .execute(pool.inner())
     .await
     .map_err(|e| format!("Failed to create interaction: {}", e))?;
@@ -112,15 +108,13 @@ pub async fn update_interaction_status(
         None
     };
 
-    sqlx::query!(
-        "UPDATE interactions SET status = ?, completed_at = ? WHERE id = ?",
-        status_json,
-        completed_at,
-        id
-    )
-    .execute(pool.inner())
-    .await
-    .map_err(|e| format!("Failed to update interaction status: {}", e))?;
+    sqlx::query("UPDATE interactions SET status = ?, completed_at = ? WHERE id = ?")
+        .bind(&status_json)
+        .bind(&completed_at)
+        .bind(&id)
+        .execute(pool.inner())
+        .await
+        .map_err(|e| format!("Failed to update interaction status: {}", e))?;
 
     Ok(())
 }
@@ -131,7 +125,8 @@ pub async fn delete_workflow_interactions(
     pool: State<'_, SqlitePool>,
     workflow_id: String,
 ) -> Result<(), String> {
-    sqlx::query!("DELETE FROM interactions WHERE workflow_id = ?", workflow_id)
+    sqlx::query("DELETE FROM interactions WHERE workflow_id = ?")
+        .bind(&workflow_id)
         .execute(pool.inner())
         .await
         .map_err(|e| format!("Failed to delete workflow interactions: {}", e))?;
@@ -146,73 +141,65 @@ pub async fn get_interaction_stats(
     workflow_id: Option<String>,
 ) -> Result<serde_json::Value, String> {
     let (total, completed, failed, avg_duration) = if let Some(wf_id) = workflow_id {
-        let total: i32 = sqlx::query_scalar!(
-            "SELECT COUNT(*) as count FROM interactions WHERE workflow_id = ?",
-            wf_id
+        let total: i32 = sqlx::query_scalar::<_, i32>(
+            "SELECT COUNT(*) FROM interactions WHERE workflow_id = ?"
         )
+        .bind(&wf_id)
         .fetch_one(pool.inner())
         .await
-        .map_err(|e| e.to_string())?
-        .unwrap_or(0);
+        .map_err(|e| e.to_string())?;
 
-        let completed: i32 = sqlx::query_scalar!(
-            r#"SELECT COUNT(*) as count FROM interactions WHERE workflow_id = ? AND status = '"completed"'"#,
-            wf_id
+        let completed: i32 = sqlx::query_scalar::<_, i32>(
+            r#"SELECT COUNT(*) FROM interactions WHERE workflow_id = ? AND status = '"completed"'"#
         )
+        .bind(&wf_id)
         .fetch_one(pool.inner())
         .await
-        .map_err(|e| e.to_string())?
-        .unwrap_or(0);
+        .map_err(|e| e.to_string())?;
 
-        let failed: i32 = sqlx::query_scalar!(
-            r#"SELECT COUNT(*) as count FROM interactions WHERE workflow_id = ? AND status = '"failed"'"#,
-            wf_id
+        let failed: i32 = sqlx::query_scalar::<_, i32>(
+            r#"SELECT COUNT(*) FROM interactions WHERE workflow_id = ? AND status = '"failed"'"#
         )
+        .bind(&wf_id)
         .fetch_one(pool.inner())
         .await
-        .map_err(|e| e.to_string())?
-        .unwrap_or(0);
+        .map_err(|e| e.to_string())?;
 
-        let avg_duration: f64 = sqlx::query_scalar!(
-            "SELECT COALESCE(AVG(duration_ms), 0) as avg FROM interactions WHERE workflow_id = ? AND duration_ms IS NOT NULL",
-            wf_id
+        let avg_duration: f64 = sqlx::query_scalar::<_, f64>(
+            "SELECT COALESCE(AVG(duration_ms), 0) FROM interactions WHERE workflow_id = ? AND duration_ms IS NOT NULL"
         )
+        .bind(&wf_id)
         .fetch_one(pool.inner())
         .await
-        .map_err(|e| e.to_string())?
-        .unwrap_or(0.0);
+        .map_err(|e| e.to_string())?;
 
         (total, completed, failed, avg_duration)
     } else {
-        let total: i32 = sqlx::query_scalar!("SELECT COUNT(*) as count FROM interactions")
+        let total: i32 = sqlx::query_scalar::<_, i32>("SELECT COUNT(*) FROM interactions")
             .fetch_one(pool.inner())
             .await
-            .map_err(|e| e.to_string())?
-            .unwrap_or(0);
+            .map_err(|e| e.to_string())?;
 
-        let completed: i32 = sqlx::query_scalar!(
-            r#"SELECT COUNT(*) as count FROM interactions WHERE status = '"completed"'"#
+        let completed: i32 = sqlx::query_scalar::<_, i32>(
+            r#"SELECT COUNT(*) FROM interactions WHERE status = '"completed"'"#
         )
         .fetch_one(pool.inner())
         .await
-        .map_err(|e| e.to_string())?
-        .unwrap_or(0);
+        .map_err(|e| e.to_string())?;
 
-        let failed: i32 = sqlx::query_scalar!(
-            r#"SELECT COUNT(*) as count FROM interactions WHERE status = '"failed"'"#
+        let failed: i32 = sqlx::query_scalar::<_, i32>(
+            r#"SELECT COUNT(*) FROM interactions WHERE status = '"failed"'"#
         )
         .fetch_one(pool.inner())
         .await
-        .map_err(|e| e.to_string())?
-        .unwrap_or(0);
+        .map_err(|e| e.to_string())?;
 
-        let avg_duration: f64 = sqlx::query_scalar!(
-            "SELECT COALESCE(AVG(duration_ms), 0) as avg FROM interactions WHERE duration_ms IS NOT NULL"
+        let avg_duration: f64 = sqlx::query_scalar::<_, f64>(
+            "SELECT COALESCE(AVG(duration_ms), 0) FROM interactions WHERE duration_ms IS NOT NULL"
         )
         .fetch_one(pool.inner())
         .await
-        .map_err(|e| e.to_string())?
-        .unwrap_or(0.0);
+        .map_err(|e| e.to_string())?;
 
         (total, completed, failed, avg_duration)
     };
