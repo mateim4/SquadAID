@@ -22,15 +22,15 @@ import {
   Spinner,
 } from '@fluentui/react-components';
 import {
-  ChevronDown24Regular,
-  ChevronUp24Regular,
-  Person24Regular,
-  Checkmark24Regular,
-  Warning24Regular,
-  Clock24Regular,
-  Dismiss24Regular,
-  Settings24Regular,
-} from '@fluentui/react-icons';
+  ExpandIcon,
+  CollapseIcon,
+  PersonIcon,
+  SuccessIcon,
+  WarningIcon,
+  PendingIcon,
+  CloseIcon,
+  SettingsIcon,
+} from '@/components/icons';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { useRoleStore } from '@/store/roleStore';
 import { useAgentStore } from '@/store/agentStore';
@@ -251,11 +251,11 @@ const StatusIcon = ({ status }: { status?: AgentStatus }) => {
     case AgentStatus.CONNECTING:
       return <Spinner size="tiny" />;
     case AgentStatus.ACTIVE:
-      return <Checkmark24Regular />;
+      return <SuccessIcon />;
     case AgentStatus.ERROR:
-      return <Warning24Regular />;
+      return <WarningIcon />;
     case AgentStatus.PAUSED:
-      return <Clock24Regular />;
+      return <PendingIcon />;
     default:
       return null;
   }
@@ -415,7 +415,7 @@ const EnhancedAgentNode = memo(({ id, data, selected }: NodeProps<EnhancedAgentN
         className={`${styles.cardHeader} drag-handle`}
         header={
           <div className={styles.headerContent}>
-            <Person24Regular />
+            <PersonIcon />
             <b>{data.label || name || 'Enhanced Agent'}</b>
             {assignedRole && (
               <Badge size="small" appearance="outline">
@@ -428,7 +428,7 @@ const EnhancedAgentNode = memo(({ id, data, selected }: NodeProps<EnhancedAgentN
           <Button 
             size="small" 
             appearance="subtle" 
-            icon={<Dismiss24Regular />}
+            icon={<CloseIcon />}
             onClick={(e) => { e.stopPropagation(); removeNode(id); }}
           />
         }
@@ -448,7 +448,7 @@ const EnhancedAgentNode = memo(({ id, data, selected }: NodeProps<EnhancedAgentN
               <Button 
                 size="small" 
                 appearance="subtle"
-                icon={<Settings24Regular />}
+                icon={<SettingsIcon />}
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 {assignedRole ? 'Change' : 'Assign'}
@@ -623,7 +623,7 @@ const EnhancedAgentNode = memo(({ id, data, selected }: NodeProps<EnhancedAgentN
           <Button
             appearance="subtle"
             size="small"
-            icon={expanded ? <ChevronUp24Regular /> : <ChevronDown24Regular />}
+            icon={expanded ? <CollapseIcon /> : <ExpandIcon />}
             onClick={(e) => {
               e.stopPropagation();
               setExpanded(!expanded);

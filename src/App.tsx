@@ -8,14 +8,14 @@ import {
     ToggleButton,
 } from '@fluentui/react-components';
 import {
-    WeatherSunny24Regular,
-    WeatherMoon24Regular,
-    PlayCircle24Regular,
-    Briefcase24Regular,
-    PeopleTeam24Regular,
-    Cube24Regular,
-    Settings24Regular,
-} from '@fluentui/react-icons';
+    LightModeIcon,
+    DarkModeIcon,
+    PlaygroundIcon,
+    ProjectsIcon,
+    TeamBuilderIcon,
+    AnalyticsIcon,
+    SettingsIcon,
+} from '@/components/icons';
 import { useStyles } from '@/styles/useStyles';
 import { squadAIDLightTheme, squadAIDDarkTheme } from '@/styles/themes';
 import { AnimatedBackground } from '@/components/background/AnimatedBackground';
@@ -29,6 +29,8 @@ import SettingsPage from '@/pages/SettingsPage';
 import ProjectsPage from '@/pages/ProjectsPage';
 import { initializeFromBackend } from '@/services/syncService';
 import { useRoleStore } from '@/store/roleStore';
+import { SkipLink } from '@/components/ui';
+import { iconSizes } from '@/styles/designTokens';
 
 const App: React.FC = () => {
     const styles = useStyles();
@@ -81,21 +83,22 @@ const App: React.FC = () => {
 
     return (
         <FluentProvider theme={theme} className="accent-gradient">
+            <SkipLink targetId="main-content" />
             <div className={`${styles.root} ${isDarkTheme ? styles.rootDark : styles.rootLight}`}>
                 <AnimatedBackground isDarkTheme={isDarkTheme}/>
                 <div className={styles.mainUI}>
-                                        <header className={`${styles.header} ${isDarkTheme ? styles.headerDark : styles.headerLight}`}>
+                                        <header className={`${styles.header} ${isDarkTheme ? styles.headerDark : styles.headerLight}`} role="banner">
                                                 <div className={styles.headerTitle}>
-                                                     <Cube24Regular fontSize={30}/>
+                                                     <AnalyticsIcon fontSize={iconSizes.xl} aria-hidden="true" />
                                                      <Title3 style={{ fontSize: 22 }}>SquadAID</Title3>
                                                 </div>
                                                 <nav role="navigation" aria-label="Main navigation">
                                                 <TabList selectedValue={selectedTab} onTabSelect={onTabSelect}>
-                                                        <Tab value="projects" className={styles.tab} icon={<Briefcase24Regular fontSize={22}/>}>Projects</Tab>
-                                                        <Tab value="team-builder" className={styles.tab} icon={<PeopleTeam24Regular fontSize={22}/>}>Team Builder</Tab>
-                                                        <Tab value="playground" className={styles.tab} icon={<PlayCircle24Regular fontSize={22}/>}>Playground</Tab>
-                                                        <Tab value="analytics" className={styles.tab} icon={<Cube24Regular fontSize={22}/>}>Analytics</Tab>
-                                                    <Tab value="settings" className={styles.tab} icon={<Settings24Regular fontSize={22}/>}>Settings</Tab>
+                                                        <Tab value="projects" className={styles.tab} icon={<ProjectsIcon fontSize={iconSizes.lg} aria-hidden="true" />}>Projects</Tab>
+                                                        <Tab value="team-builder" className={styles.tab} icon={<TeamBuilderIcon fontSize={iconSizes.lg} aria-hidden="true" />}>Team Builder</Tab>
+                                                        <Tab value="playground" className={styles.tab} icon={<PlaygroundIcon fontSize={iconSizes.lg} aria-hidden="true" />}>Playground</Tab>
+                                                        <Tab value="analytics" className={styles.tab} icon={<AnalyticsIcon fontSize={iconSizes.lg} aria-hidden="true" />}>Analytics</Tab>
+                                                    <Tab value="settings" className={styles.tab} icon={<SettingsIcon fontSize={iconSizes.lg} aria-hidden="true" />}>Settings</Tab>
                                                 </TabList>
                                                 </nav>
                                                 <div className={styles.headerControls}>
@@ -104,7 +107,7 @@ const App: React.FC = () => {
                                                         <ToggleButton 
                                                                 checked={!isDarkTheme} 
                                                                 onClick={() => setIsDarkTheme(!isDarkTheme)} 
-                                                                icon={isDarkTheme ? <WeatherMoon24Regular /> : <WeatherSunny24Regular />}
+                                                                icon={isDarkTheme ? <DarkModeIcon /> : <LightModeIcon />}
                                                                 aria-label={isDarkTheme ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                                                                 title={isDarkTheme ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                                                                 style={{ backgroundColor: isDarkTheme ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)' }}
@@ -113,7 +116,7 @@ const App: React.FC = () => {
                                                 </div>
                                         </header>
 
-                    <main className={styles.mainContent}>
+                    <main id="main-content" className={styles.mainContent} role="main">
                         {selectedTab === 'team-builder' && (
                             <>
                                 <AgentLibrary />

@@ -14,7 +14,7 @@ import {
   SelectTabEvent,
   SelectTabData,
 } from '@fluentui/react-components';
-import { Play24Regular, Code24Regular, Timeline24Regular } from '@fluentui/react-icons';
+import { PlayIcon, CodeIcon, TimelineIcon } from '@/components/icons';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { useInteractionStore } from '@/store/interactionStore';
@@ -192,10 +192,10 @@ function PlaygroundPage() {
             onTabSelect={handleTabSelect}
             size="small"
           >
-            <Tab value="dashboard" icon={<Timeline24Regular />}>
+            <Tab value="dashboard" icon={<TimelineIcon />}>
               Dashboard
             </Tab>
-            <Tab value="console" icon={<Code24Regular />}>
+            <Tab value="console" icon={<CodeIcon />}>
               Console
             </Tab>
           </TabList>
@@ -203,7 +203,7 @@ function PlaygroundPage() {
         <PrimaryButton 
           onClick={handleRun} 
           disabled={isRunning}
-          icon={<Play24Regular />}
+          icon={<PlayIcon />}
         >
           {isRunning ? 'Running...' : 'Run Workflow'}
         </PrimaryButton>

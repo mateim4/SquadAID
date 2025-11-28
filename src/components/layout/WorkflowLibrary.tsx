@@ -7,11 +7,13 @@ import {
   Divider,
   tokens,
   Input,
+  Spinner,
+  Field,
 } from '@fluentui/react-components';
 import {
-  Save24Regular,
-  PlayCircle24Regular,
-} from '@fluentui/react-icons';
+  SaveIcon,
+  PlaygroundIcon,
+} from '@/components/icons';
 import { useStyles } from '@/styles/useStyles';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { NodeSettings } from '@/components/settings/NodeSettings';
@@ -35,39 +37,108 @@ const SaveWorkflowDialog: React.FC<{ onSaved?: (id: string) => void; projectSlug
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<string | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [nameError, setNameError] = useState<string | undefined>();
+
+  const validateName = (value: string) => {
+    if (!value.trim()) {
+      setNameError('Workflow name is required');
+      return false;
+    }
+    if (value.length < 2) {
+      setNameError('Name must be at least 2 characters');
+      return false;
+    }
+    setNameError(undefined);
+    return true;
+  };
 
   const save = async () => {
-    const created = await createWorkflow(projectSlug, name || 'untitled', description || '', viewport);
-    const wf = (created.result as any[])[0];
-    const id = wf?.id || wf?.[0]?.id;
-    await saveGraph(id, { nodes, edges, viewport });
-    setStatus(`Saved ${name || 'untitled'}`);
-    onSaved?.(id);
-    setName(''); setDescription('');
+    if (!validateName(name)) return;
+    
+    setIsSaving(true);
+    setStatus(undefined);
+    try {
+      const created = await createWorkflow(projectSlug, name.trim(), description.trim(), viewport);
+      const wf = (created.result as any[])[0];
+      const id = wf?.id || wf?.[0]?.id;
+      await saveGraph(id, { nodes, edges, viewport });
+      setStatus(`Saved "${name.trim()}" successfully`);
+      onSaved?.(id);
+      setName('');
+      setDescription('');
+      setIsOpen(false);
+    } catch (error: any) {
+      setStatus(`Error: ${error?.message || 'Failed to save workflow'}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={(_, data) => setIsOpen(data.open)}>
       <DialogTrigger>
-        <Button icon={<Save24Regular />} style={{ width: '100%' }}>
+        <Button icon={<SaveIcon />} style={{ width: '100%' }} aria-label="Save current workflow">
           Save Current Workflow
         </Button>
       </DialogTrigger>
-      <DialogSurface>
+      <DialogSurface aria-describedby="save-workflow-description">
         <DialogBody>
           <DialogTitle>Save Workflow</DialogTitle>
-          <DialogContent>
-            <Input placeholder="Workflow Name" value={name} onChange={(e, d) => setName(d.value)} style={{ marginBottom: 10 }} />
-            <Input placeholder="Workflow Description" value={description} onChange={(e, d) => setDescription(d.value)} />
-            {status && <Caption1 style={{ display: 'block', marginTop: 6, color: tokens.colorNeutralForeground2 }}>{status}</Caption1>}
+          <DialogContent id="save-workflow-description">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <Field
+                label="Workflow Name"
+                required
+                validationState={nameError ? 'error' : undefined}
+                validationMessage={nameError}
+              >
+                <Input
+                  placeholder="e.g., Customer Support Flow"
+                  value={name}
+                  onChange={(e, d) => {
+                    setName(d.value);
+                    if (nameError) validateName(d.value);
+                  }}
+                  onBlur={() => validateName(name)}
+                  disabled={isSaving}
+                  aria-required="true"
+                />
+              </Field>
+              <Field label="Description">
+                <Input
+                  placeholder="Optional description"
+                  value={description}
+                  onChange={(e, d) => setDescription(d.value)}
+                  disabled={isSaving}
+                />
+              </Field>
+              {status && (
+                <Caption1 style={{ 
+                  display: 'block', 
+                  marginTop: 6, 
+                  color: status.startsWith('Error') ? tokens.colorPaletteRedForeground1 : tokens.colorPaletteGreenForeground1 
+                }}>
+                  {status}
+                </Caption1>
+              )}
+            </div>
           </DialogContent>
           <DialogActions>
-            <DialogTrigger>
-              <FluentButton appearance="secondary">Cancel</FluentButton>
-            </DialogTrigger>
-            <DialogTrigger>
-              <PrimaryButton onClick={save}>Save</PrimaryButton>
-            </DialogTrigger>
+            <FluentButton appearance="secondary" onClick={() => setIsOpen(false)} disabled={isSaving}>
+              Cancel
+            </FluentButton>
+            <PrimaryButton onClick={save} disabled={isSaving || !name.trim()}>
+              {isSaving ? (
+                <>
+                  <Spinner size="tiny" style={{ marginRight: 8 }} />
+                  Saving...
+                </>
+              ) : (
+                'Save'
+              )}
+            </PrimaryButton>
           </DialogActions>
         </DialogBody>
       </DialogSurface>
@@ -121,7 +192,7 @@ export const WorkflowLibrary: React.FC = () => {
       <div style={{ padding: isMobile ? '0 12px 8px' : '0 16px 12px' }}>
   <SaveWorkflowDialog projectSlug={projectSlug} onSaved={() => { setSurMsg('Saved'); refreshWorkflows(); }} />
         <div style={{ marginTop: isMobile ? 6 : 8, display: 'flex', flexDirection: 'column', gap: isMobile ? 6 : 8 }}>
-          <PrimaryButton icon={<PlayCircle24Regular />} onClick={runWorkflow} disabled={running}>
+          <PrimaryButton icon={<PlaygroundIcon />} onClick={runWorkflow} disabled={running}>
             {running ? 'Running…' : 'Run Workflow'}
           </PrimaryButton>
           {lastRun && (
@@ -130,7 +201,14 @@ export const WorkflowLibrary: React.FC = () => {
             </Caption1>
           )}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: isMobile ? 6 : 10, alignItems: 'center' }}>
-            <Input style={{ width: isMobile ? 90 : 100 }} value={dbId} onChange={(e, d) => setDbId(d.value)} contentBefore={<span>ID</span>} />
+            <Input 
+              className={styles.frostedInput}
+              style={{ width: isMobile ? 90 : 100 }} 
+              value={dbId} 
+              onChange={(e, d) => setDbId(d.value)} 
+              contentBefore={<span>ID</span>}
+              aria-label="Database ID"
+            />
             <Button
               onClick={async () => {
                 const { saveWorkflowToDb } = await import('@/services/persistence');
@@ -163,8 +241,22 @@ export const WorkflowLibrary: React.FC = () => {
             </Caption1>
           )}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: isMobile ? 8 : 14, alignItems: 'center' }}>
-            <Input style={{ width: isMobile ? 130 : 140 }} value={projectSlug} onChange={(e, d) => setProjectSlug(d.value)} placeholder="project slug" />
-            <Input style={{ width: isMobile ? 140 : 160 }} value={workflowName} onChange={(e, d) => setWorkflowName(d.value)} placeholder="workflow name" />
+            <Input 
+              className={styles.frostedInput}
+              style={{ width: isMobile ? 130 : 140 }} 
+              value={projectSlug} 
+              onChange={(e, d) => setProjectSlug(d.value)} 
+              placeholder="project slug"
+              aria-label="Project slug"
+            />
+            <Input 
+              className={styles.frostedInput}
+              style={{ width: isMobile ? 140 : 160 }} 
+              value={workflowName} 
+              onChange={(e, d) => setWorkflowName(d.value)} 
+              placeholder="workflow name"
+              aria-label="Workflow name"
+            />
             <Button
               onClick={async () => {
                 try {

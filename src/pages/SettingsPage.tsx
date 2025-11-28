@@ -6,7 +6,7 @@ import { getUser, hasGitHubToken } from '@/services/github';
 import GitHubSignIn from '@/components/auth/GitHubSignIn';
 import { beginGoogleDeviceFlow, pollGoogleDeviceToken, hasGoogleAuth, getGoogleUserInfo } from '@/services/google';
 import { useStyles as useGlobalStyles } from '@/styles/useStyles';
-import { Checkmark24Regular, ErrorCircle24Regular } from '@fluentui/react-icons';
+import { SuccessIcon, ErrorIcon } from '@/components/icons';
 
 const useStyles = makeStyles({
   page: {
@@ -222,7 +222,13 @@ function SettingsPage() {
               <Divider />
               <Label htmlFor="name-input">IPC Test</Label>
               <div className={styles.inlineRow}>
-                <Input id="name-input" value={name} onChange={(_e, data) => setName(data.value)} placeholder="Your name" />
+                <Input 
+                  className={global.frostedInput}
+                  id="name-input" 
+                  value={name} 
+                  onChange={(_e, data) => setName(data.value)} 
+                  placeholder="Your name" 
+                />
                 <Button onClick={performGreet}>Greet from Rust</Button>
               </div>
               <div className={styles.result}><Text>{greetMsg}</Text></div>
@@ -239,7 +245,14 @@ function SettingsPage() {
               <Text size={200}>{ghStatus}</Text>
               <Divider />
               <Label>Personal Access Token (fallback)</Label>
-              <Input value={ghToken} onChange={(_e, d) => setGhToken(d.value)} placeholder="ghp_..." type="password" />
+              <Input 
+                className={global.frostedInput}
+                value={ghToken} 
+                onChange={(_e, d) => setGhToken(d.value)} 
+                placeholder="ghp_..." 
+                type="password"
+                aria-label="GitHub personal access token"
+              />
               <div className={styles.inlineRow}>
                 <Button data-appearance="primary" appearance="primary" onClick={async () => { 
                   try {
@@ -248,7 +261,7 @@ function SettingsPage() {
                     setGhStatus('Saved ✓'); 
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<Checkmark24Regular />}>GitHub token saved successfully</ToastTitle>
+                        <ToastTitle media={<SuccessIcon />}>GitHub token saved successfully</ToastTitle>
                       </Toast>,
                       { intent: 'success', timeout: 3000 }
                     );
@@ -256,7 +269,7 @@ function SettingsPage() {
                     setGhStatus('Failed to save');
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<ErrorCircle24Regular />}>Failed to save GitHub token</ToastTitle>
+                        <ToastTitle media={<ErrorIcon />}>Failed to save GitHub token</ToastTitle>
                       </Toast>,
                       { intent: 'error', timeout: 5000 }
                     );
@@ -291,14 +304,21 @@ function SettingsPage() {
               <Divider />
               <Label>Google Token (fallback)</Label>
               <div className={styles.inlineRow}>
-                <Input value={googleToken} onChange={(_e, d) => setGoogleToken(d.value)} placeholder="OAuth token or API key" type="password" />
+                <Input 
+                  className={global.frostedInput}
+                  value={googleToken} 
+                  onChange={(_e, d) => setGoogleToken(d.value)} 
+                  placeholder="OAuth token or API key" 
+                  type="password"
+                  aria-label="Google OAuth token"
+                />
                 <Button data-appearance="primary" appearance="primary" onClick={async () => { 
                   try {
                     await setSecret('google_token', googleToken); 
                     setGoogleStatus('Saved ✓');
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<Checkmark24Regular />}>Google token saved successfully</ToastTitle>
+                        <ToastTitle media={<SuccessIcon />}>Google token saved successfully</ToastTitle>
                       </Toast>,
                       { intent: 'success', timeout: 3000 }
                     );
@@ -306,7 +326,7 @@ function SettingsPage() {
                     setGoogleStatus('Failed to save');
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<ErrorCircle24Regular />}>Failed to save Google token</ToastTitle>
+                        <ToastTitle media={<ErrorIcon />}>Failed to save Google token</ToastTitle>
                       </Toast>,
                       { intent: 'error', timeout: 5000 }
                     );
@@ -320,14 +340,21 @@ function SettingsPage() {
               <Title3>Claude Code</Title3>
               <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>Paste the API token if you plan to use Claude-based features.</Text>
               <div className={styles.inlineRow}>
-                <Input value={claudeToken} onChange={(_e, d) => setClaudeToken(d.value)} placeholder="Claude API token" type="password" />
+                <Input 
+                  className={global.frostedInput}
+                  value={claudeToken} 
+                  onChange={(_e, d) => setClaudeToken(d.value)} 
+                  placeholder="Claude API token" 
+                  type="password"
+                  aria-label="Claude API token"
+                />
                 <Button data-appearance="primary" appearance="primary" onClick={async () => { 
                   try {
                     await setSecret('claude_token', claudeToken); 
                     setClaudeStatus('Saved ✓');
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<Checkmark24Regular />}>Claude API token saved successfully</ToastTitle>
+                        <ToastTitle media={<SuccessIcon />}>Claude API token saved successfully</ToastTitle>
                       </Toast>,
                       { intent: 'success', timeout: 3000 }
                     );
@@ -335,7 +362,7 @@ function SettingsPage() {
                     setClaudeStatus('Failed to save');
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<ErrorCircle24Regular />}>Failed to save Claude token</ToastTitle>
+                        <ToastTitle media={<ErrorIcon />}>Failed to save Claude token</ToastTitle>
                       </Toast>,
                       { intent: 'error', timeout: 5000 }
                     );
@@ -350,7 +377,14 @@ function SettingsPage() {
               <Title3>Jules AI</Title3>
               <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>Enter your Jules API key to enable Jules-powered agents.</Text>
               <div className={styles.inlineRow}>
-                <Input value={julesToken} onChange={(_e, d) => setJulesToken(d.value)} placeholder="Jules API key" type="password" />
+                <Input 
+                  className={global.frostedInput}
+                  value={julesToken} 
+                  onChange={(_e, d) => setJulesToken(d.value)} 
+                  placeholder="Jules API key" 
+                  type="password"
+                  aria-label="Jules API key"
+                />
                 <Button data-appearance="primary" appearance="primary" onClick={async () => { 
                   try {
                     console.log('Saving Jules token:', julesToken ? 'token present' : 'empty');
@@ -358,7 +392,7 @@ function SettingsPage() {
                     setJulesStatus(julesToken ? 'Saved ✓' : 'Cleared ✓');
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<Checkmark24Regular />}>
+                        <ToastTitle media={<SuccessIcon />}>
                           {julesToken ? 'Jules API key saved successfully' : 'Jules API key cleared'}
                         </ToastTitle>
                       </Toast>,
@@ -369,7 +403,7 @@ function SettingsPage() {
                     setJulesStatus(`Failed: ${err?.message || 'Unknown error'}`);
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<ErrorCircle24Regular />}>
+                        <ToastTitle media={<ErrorIcon />}>
                           Failed to save Jules API key: {err?.message || 'Unknown error'}
                         </ToastTitle>
                       </Toast>,
@@ -406,7 +440,7 @@ function SettingsPage() {
                     setGeminiStatus('Saved ✓');
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<Checkmark24Regular />}>Gemini model saved successfully</ToastTitle>
+                        <ToastTitle media={<SuccessIcon />}>Gemini model saved successfully</ToastTitle>
                       </Toast>,
                       { intent: 'success', timeout: 3000 }
                     );
@@ -414,7 +448,7 @@ function SettingsPage() {
                     setGeminiStatus('Failed to save');
                     dispatchToast(
                       <Toast>
-                        <ToastTitle media={<ErrorCircle24Regular />}>Failed to save Gemini model</ToastTitle>
+                        <ToastTitle media={<ErrorIcon />}>Failed to save Gemini model</ToastTitle>
                       </Toast>,
                       { intent: 'error', timeout: 5000 }
                     );

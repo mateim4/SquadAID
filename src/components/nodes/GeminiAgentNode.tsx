@@ -11,7 +11,7 @@ import {
   Spinner,
 } from '@fluentui/react-components';
 import { useWorkflowStore } from '@/store/workflowStore';
-import { Play24Regular } from '@fluentui/react-icons';
+import { PlayIcon } from '@/components/icons';
 import { runGeminiPrompt } from '@/services/geminiBridge';
 
 const useStyles = makeStyles({
@@ -82,7 +82,7 @@ const GeminiAgentNode = ({ id, data }: NodeProps) => {
         />
         <Button 
           appearance="primary" 
-          icon={loading ? <Spinner size="tiny" /> : <Play24Regular />}
+          icon={loading ? <Spinner size="tiny" /> : <PlayIcon />}
           onClick={handleRun}
           disabled={loading || !prompt.trim()}
         >

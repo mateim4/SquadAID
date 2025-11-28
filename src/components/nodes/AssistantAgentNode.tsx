@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useState, useCallback } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 import {
   Card,
@@ -12,10 +12,12 @@ import {
   Button,
   Dropdown,
   Option,
+  Tooltip,
 } from '@fluentui/react-components';
 import { useWorkflowStore } from '@/store/workflowStore';
-import { ChevronDown24Regular, ChevronUp24Regular } from '@fluentui/react-icons';
+import { ExpandIcon, CollapseIcon, CloseIcon } from '@/components/icons';
 import { useProjectStore } from '@/store/projectStore';
+import { ConfirmDialog } from '@/components/ui';
 
 // Lightweight controls embedded in the node for Jules bridge chat
 function JulesChatControls({ nodeId, data }: { nodeId: string; data: any }) {
@@ -91,7 +93,7 @@ function JulesChatControls({ nodeId, data }: { nodeId: string; data: any }) {
 
 const useStyles = makeStyles({
   card: {
-    width: '300px',
+    width: '320px',
     position: 'relative',
     overflow: 'hidden',
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
@@ -106,16 +108,7 @@ const useStyles = makeStyles({
     left: 0,
     right: 0,
     height: '4px',
-    backgroundImage: 'linear-gradient(90deg, #f44336, #ff9800, #ffeb3b, #4caf50, #2196f3, #3f51b5, #9c27b0)',
-    backgroundSize: '400% 100%',
-    animationName: {
-      '0%': { backgroundPosition: '0% 50%' },
-      '50%': { backgroundPosition: '100% 50%' },
-      '100%': { backgroundPosition: '0% 50%' },
-    },
-    animationDuration: '3s',
-    animationIterationCount: 'infinite',
-    animationTimingFunction: 'linear',
+    backgroundColor: tokens.colorBrandBackground,
   },
   cardContent: {
     display: 'flex',
@@ -169,6 +162,12 @@ const AssistantAgentNode = memo(({ id, data, selected }: NodeProps<AssistantAgen
   const updateNodeData = useWorkflowStore(s => s.updateNodeData);
   const removeNode = useWorkflowStore(s => s.removeNode);
   const projectMode = useProjectStore(s => s.mode);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleDelete = useCallback(() => {
+    removeNode(id);
+    setShowDeleteConfirm(false);
+  }, [id, removeNode]);
 
   // In a future step, we will lift this state up to a global store.
   // For now, it remains local to demonstrate the component's UI.
@@ -222,7 +221,25 @@ const AssistantAgentNode = memo(({ id, data, selected }: NodeProps<AssistantAgen
       <CardHeader
         className={`${styles.cardHeader} drag-handle`}
         header={<b>{data.label || 'Assistant Agent'}</b>}
-        action={<Button size="small" appearance="subtle" onClick={(e) => { e.stopPropagation(); removeNode(id); }}>✕</Button>}
+        action={
+          <Tooltip content="Remove node" relationship="label">
+            <Button 
+              size="small" 
+              appearance="subtle" 
+              icon={<CloseIcon />}
+              onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
+              aria-label={`Remove ${data.label || 'Assistant Agent'} node`}
+            />
+          </Tooltip>
+        }
+      />
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete Node?"
+        message={`Are you sure you want to delete "${data.label || 'Assistant Agent'}"? This action cannot be undone.`}
+        confirmText="Delete"
+        onConfirm={handleDelete}
       />
       <div className={styles.cardContent}>
         <Label htmlFor={`name-${id}`}>Name</Label>
@@ -518,7 +535,7 @@ const AssistantAgentNode = memo(({ id, data, selected }: NodeProps<AssistantAgen
         )}
       </div>
       <div className={styles.toggle}>
-        <Button appearance="subtle" size="small" icon={expanded ? <ChevronUp24Regular/> : <ChevronDown24Regular/>} onClick={() => updateNodeData(id, { expanded: !expanded })}>
+        <Button appearance="subtle" size="small" icon={expanded ? <CollapseIcon /> : <ExpandIcon />} onClick={() => updateNodeData(id, { expanded: !expanded })}>
           {expanded ? 'Collapse' : 'Expand'}
         </Button>
       </div>

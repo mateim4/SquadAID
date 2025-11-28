@@ -149,11 +149,17 @@ export const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    ...shorthands.padding('10px', '28px'),
+    ...shorthands.padding('10px', 'clamp(12px, 3vw, 28px)'),
     minHeight: '68px',
     // background color set via mode-specific classes
     flexShrink: 0,
     position: 'relative',
+    flexWrap: 'wrap',
+    gap: '8px',
+    '@media (max-width: 700px)': {
+      minHeight: '56px',
+      ...shorthands.padding('8px', '12px'),
+    },
      '&::after': {
       content: '""',
       position: 'absolute',
@@ -176,6 +182,11 @@ export const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('8px'),
+    '@media (max-width: 700px)': {
+      '& span': {
+        display: 'none', // Hide title text on mobile, keep icon
+      },
+    },
   },
   headerControls: {
     display: 'flex',
@@ -186,6 +197,13 @@ export const useStyles = makeStyles({
   fontSize: '16px',
   lineHeight: '22px',
   ...shorthands.padding('6px', '14px'),
+  '@media (max-width: 700px)': {
+    fontSize: '14px',
+    ...shorthands.padding('6px', '8px'),
+    '& span': {
+      display: 'none', // Hide tab text on mobile, show only icons
+    },
+  },
     '&:hover': {
       backgroundColor: 'rgba(255,255,255,0.05)',
     },

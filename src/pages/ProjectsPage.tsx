@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Body1, Button, Caption1, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, Divider, Input, Label, Select, Textarea, Title2, Title3, tokens, Checkbox, Tooltip, RadioGroup, Radio } from '@fluentui/react-components';
-import { Dismiss24Regular, Add24Regular } from '@fluentui/react-icons';
+import { CloseIcon, AddIcon } from '@/components/icons';
 import { useStyles } from '@/styles/useStyles';
 import { createStage, createTask, getProjectBySlug, listProjects, listStages, listTasks, setProjectMode, upsertProject, updateProject, listWorkflows, updateTask, updateTaskStatus, linkTaskToStage, listProjectStats } from '@/services/surreal';
 import { Project, ProjectMode } from '@/types';
@@ -427,7 +427,7 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
         {mode !== 'github' && (
           <div style={{ marginTop: 8 }}>
             {!showNewTask ? (
-              <Button className={styles.frostedButtonWide} appearance="subtle" icon={<Add24Regular />} onClick={() => setShowNewTask(true)}>Add Task</Button>
+              <Button className={styles.frostedButtonWide} appearance="subtle" icon={<AddIcon />} onClick={() => setShowNewTask(true)}>Add Task</Button>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 10, border: `1px solid ${tokens.colorNeutralStroke2}`, borderRadius: 12 }}>
                 <Label>Title</Label>
@@ -520,7 +520,7 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
           );
         })}
         <div style={{ marginTop: 8 }}>
-          <Button className={styles.frostedButtonWide} appearance="subtle" icon={<Add24Regular />} onClick={() => {
+          <Button className={styles.frostedButtonWide} appearance="subtle" icon={<AddIcon />} onClick={() => {
             setIsCreateOpen(true);
             setCreateType('local');
             setCreateName('');

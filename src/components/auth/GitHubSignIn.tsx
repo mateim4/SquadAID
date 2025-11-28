@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Caption1, Input, Label, Spinner, Tooltip, tokens } from '@fluentui/react-components';
 import { beginDeviceFlow, getUser, hasGitHubToken, pollDeviceToken } from '@/services/github';
+import { useStyles } from '@/styles/useStyles';
 
 type Props = {
   onAuthStarted?: () => void;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function GitHubSignIn({ onAuthStarted, onAuthSuccess, onAuthFailure, compact }: Props) {
+  const styles = useStyles();
   const [isAuthInProgress, setIsAuthInProgress] = useState(false);
   const [msg, setMsg] = useState('');
   const [hasToken, setHasToken] = useState<boolean>(false);
@@ -93,7 +95,13 @@ export default function GitHubSignIn({ onAuthStarted, onAuthSuccess, onAuthFailu
       {code && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <Label>Code</Label>
-          <Input value={code} readOnly style={{ maxWidth: 180 }} />
+          <Input 
+            className={styles.frostedInput}
+            value={code} 
+            readOnly 
+            style={{ maxWidth: 180 }}
+            aria-label="Device authorization code"
+          />
           <Tooltip content="Open verification page" relationship="label">
             <Button size="small" appearance="secondary" onClick={() => { try { window.open(verifyUrl, '_blank'); } catch (e) { void e; } }}>Open</Button>
           </Tooltip>

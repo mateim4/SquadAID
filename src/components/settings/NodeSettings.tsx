@@ -16,7 +16,7 @@ import {
   Select,
   Tooltip,
 } from '@fluentui/react-components';
-import { Play24Regular, ArrowClockwise24Regular } from '@fluentui/react-icons';
+import { PlayIcon, RefreshIcon } from '@/components/icons';
 import { apiService } from '@/services/api';
 import { testOllamaConnection, listLocalModels } from '@/services/ollama';
 import { OllamaModel } from '@/services/ollama';
@@ -315,7 +315,7 @@ export const NodeSettings: React.FC = () => {
             )}
             <Tooltip content="Refresh model list" relationship="label">
               <Button
-                icon={testingOllama ? <Spinner size="tiny" /> : <ArrowClockwise24Regular />}
+                icon={testingOllama ? <Spinner size="tiny" /> : <RefreshIcon />}
                 onClick={checkOllamaStatus}
                 disabled={testingOllama}
               />
@@ -374,7 +374,7 @@ export const NodeSettings: React.FC = () => {
         </>
       )}
       <div>
-  <Button data-appearance="primary" appearance="primary" icon={<Play24Regular />} onClick={testAgent} disabled={!agentId || testing}>
+  <Button data-appearance="primary" appearance="primary" icon={<PlayIcon />} onClick={testAgent} disabled={!agentId || testing}>
           {testing ? <Spinner size="tiny" /> : 'Test Agent'}
         </Button>
       </div>

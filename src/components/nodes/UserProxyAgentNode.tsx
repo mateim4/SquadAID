@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useCallback } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 import {
   Card,
@@ -11,13 +11,15 @@ import {
   Label,
   Textarea,
   Button,
+  Tooltip,
 } from '@fluentui/react-components';
 import { useWorkflowStore } from '@/store/workflowStore';
-import { ChevronDown24Regular, ChevronUp24Regular } from '@fluentui/react-icons';
+import { ExpandIcon, CollapseIcon, CloseIcon } from '@/components/icons';
+import { ConfirmDialog } from '@/components/ui';
 
 const useStyles = makeStyles({
   card: {
-  width: '300px',
+  width: '320px',
   position: 'relative',
   overflow: 'hidden',
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
@@ -32,16 +34,7 @@ const useStyles = makeStyles({
     left: 0,
     right: 0,
     height: '4px',
-    backgroundImage: 'linear-gradient(90deg, #f44336, #ff9800, #ffeb3b, #4caf50, #2196f3, #3f51b5, #9c27b0)',
-    backgroundSize: '400% 100%',
-    animationName: {
-      '0%': { backgroundPosition: '0% 50%' },
-      '50%': { backgroundPosition: '100% 50%' },
-      '100%': { backgroundPosition: '0% 50%' },
-    },
-    animationDuration: '3s',
-    animationIterationCount: 'infinite',
-    animationTimingFunction: 'linear',
+    backgroundColor: tokens.colorBrandBackground,
   },
   cardContent: {
     display: 'flex',
@@ -89,11 +82,17 @@ const UserProxyAgentNode = memo(({ id, data, selected }: NodeProps<UserProxyAgen
   const styles = useStyles();
   const updateNodeData = useWorkflowStore(s => s.updateNodeData);
   const removeNode = useWorkflowStore(s => s.removeNode);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { name, systemMessage = '', expanded } = data as UserProxyAgentNodeData;
   const extraEntries = useMemo(() => {
     const omit = new Set(['name','systemMessage','label','icon','agentId','expanded']);
     return Object.entries(data || {}).filter(([k]) => !omit.has(k));
   }, [data]);
+
+  const handleDelete = useCallback(() => {
+    removeNode(id);
+    setShowDeleteConfirm(false);
+  }, [id, removeNode]);
 
   return (
     <Card className={styles.card}>
@@ -106,7 +105,25 @@ const UserProxyAgentNode = memo(({ id, data, selected }: NodeProps<UserProxyAgen
       <CardHeader
         className={`${styles.cardHeader} drag-handle`}
         header={<b>User Proxy Agent</b>}
-        action={<Button size="small" appearance="subtle" onClick={(e) => { e.stopPropagation(); removeNode(id); }}>✕</Button>}
+        action={
+          <Tooltip content="Remove node" relationship="label">
+            <Button 
+              size="small" 
+              appearance="subtle" 
+              icon={<CloseIcon />}
+              onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
+              aria-label="Remove User Proxy Agent node"
+            />
+          </Tooltip>
+        }
+      />
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete Node?"
+        message="Are you sure you want to delete the User Proxy Agent? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
       />
       <div className={styles.cardContent}>
         <Text>
@@ -184,7 +201,7 @@ const UserProxyAgentNode = memo(({ id, data, selected }: NodeProps<UserProxyAgen
         )}
       </div>
       <div className={styles.toggle}>
-        <Button appearance="subtle" size="small" icon={expanded ? <ChevronUp24Regular/> : <ChevronDown24Regular/>} onClick={() => updateNodeData(id, { expanded: !expanded })}>
+        <Button appearance="subtle" size="small" icon={expanded ? <CollapseIcon /> : <ExpandIcon />} onClick={() => updateNodeData(id, { expanded: !expanded })}>
           {expanded ? 'Collapse' : 'Expand'}
         </Button>
       </div>
