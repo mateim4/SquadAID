@@ -732,21 +732,131 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
     </ContentCard>
   );
 
+  // Create Project Dialog component (shared between render prop and fallback)
+  const createProjectDialog = (
+    <Dialog open={isCreateOpen} onOpenChange={(_, data) => setIsCreateOpen(data.open)}>
+      <DialogSurface>
+        <DialogBody>
+          <DialogTitle>Create New Project</DialogTitle>
+          <DialogContent>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <Label htmlFor="project-name">Project Name</Label>
+                <Input 
+                  id="project-name"
+                  value={createName} 
+                  onChange={(_, d) => { 
+                    setCreateName(d.value);
+                    setCreateSlug(sanitizeSlug(d.value));
+                  }} 
+                  placeholder="My Project" 
+                />
+              </div>
+              <div>
+                <Label htmlFor="project-slug">Slug</Label>
+                <Input 
+                  id="project-slug"
+                  value={createSlug} 
+                  onChange={(_, d) => setCreateSlug(sanitizeSlug(d.value))} 
+                  placeholder="my-project" 
+                />
+                <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>URL-safe identifier for the project</Caption1>
+              </div>
+              <div>
+                <Label>Project Type</Label>
+                <RadioGroup value={createType} onChange={(_, d) => setCreateType(d.value as any)}>
+                  <Radio value="local" label="Local only - Tasks stored locally" />
+                  <Radio value="hybrid" label="Hybrid - Local tasks synced with GitHub issues" />
+                  <Radio value="github" label="GitHub only - Tasks are GitHub issues" />
+                </RadioGroup>
+              </div>
+              {(createType === 'hybrid' || createType === 'github') && (
+                <div>
+                  <Label htmlFor="project-repo">GitHub Repository</Label>
+                  <Input 
+                    id="project-repo"
+                    value={createRepo} 
+                    onChange={(_, d) => setCreateRepo(d.value)} 
+                    placeholder="owner/repo" 
+                  />
+                  {!ghAuthed && (
+                    <Caption1 style={{ color: tokens.colorPaletteYellowForeground1 }}>
+                      Connect to GitHub in Settings to enable repository features
+                    </Caption1>
+                  )}
+                  {createGhMsg && <Caption1>{createGhMsg}</Caption1>}
+                </div>
+              )}
+              {createError && (
+                <Caption1 style={{ color: tokens.colorPaletteRedForeground1 }}>{createError}</Caption1>
+              )}
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button appearance="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+            <Button 
+              data-appearance="primary"
+              className={styles.confirmButton}
+              appearance="primary" 
+              disabled={!createName.trim() || !createSlug.trim()}
+              onClick={async () => {
+                try {
+                  setCreateError('');
+                  await upsertProject(createSlug, {
+                    name: createName,
+                    mode: createType,
+                    repo: (createType !== 'local' && createRepo) ? createRepo : undefined,
+                  });
+                  // Update default_branch separately if needed
+                  if (createBranch) {
+                    await updateProject(createSlug, { default_branch: createBranch });
+                  }
+                  setIsCreateOpen(false);
+                  setCreateName('');
+                  setCreateSlug('');
+                  setCreateRepo('');
+                  setCreateBranch('');
+                  await refreshProjectLists();
+                  setActiveSlug(createSlug);
+                  setView('board');
+                } catch (e: any) {
+                  setCreateError(e?.message || 'Failed to create project');
+                }
+              }}
+            >
+              Create Project
+            </Button>
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
+    </Dialog>
+  );
+
   if (render) {
     if (isMobile) {
       // On mobile, we only want to show the active content view, not the sidebars
       const activeContent = activeSlug ? content : leftSidebar;
-      return render({
-        left: <div style={{ display: 'none' }} />,
-        content: activeContent,
-        right: <div style={{ display: 'none' }} />,
-      });
+      return (
+        <>
+          {render({
+            left: <div style={{ display: 'none' }} />,
+            content: activeContent,
+            right: <div style={{ display: 'none' }} />,
+          })}
+          {createProjectDialog}
+        </>
+      );
     }
-    return render({
-      left: leftSidebar,
-      content: content,
-      right: rightSidebar,
-    });
+    return (
+      <>
+        {render({
+          left: leftSidebar,
+          content: content,
+          right: rightSidebar,
+        })}
+        {createProjectDialog}
+      </>
+    );
   }
 
   // Fallback rendering for non-grid layouts
@@ -755,6 +865,7 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
       {leftSidebar}
       {content}
       {rightSidebar}
+      {createProjectDialog}
     </div>
   );
 }

@@ -30,7 +30,7 @@ test.describe('Fluent 2 Design System Validation', () => {
     console.log('Title Bar Styles:', titleBarStyles);
     
     // Analyze palette design
-  const palette = page.locator('.palette, [class*="palette"], [aria-label="Agent palette"]');
+  const palette = page.locator('.palette, [class*="palette"], [aria-label="Agent library"]');
     await expect(palette).toBeVisible();
     
     const paletteStyles = await palette.evaluate(el => {

@@ -44,17 +44,17 @@ test.describe('SquadAID UI/UX Tests', () => {
   });
 
   test('agent palette is visible and functional', async ({ page }) => {
-    // Should show the agent palette
-  await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    // Should show the agent library (palette)
+    await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
     
     // Should show all agent types
-  await expect(page.getByText('Claude Assistant')).toBeVisible();
-  await expect(page.getByText('Local Ollama')).toBeVisible();
-  await expect(page.getByText('MSTY Agent')).toBeVisible();
-  await expect(page.getByText('Jules Coder')).toBeVisible();
-  await expect(page.getByText('Copilot Async Coder')).toBeVisible();
-  await expect(page.getByText('Custom Agent')).toBeVisible();
-  await expect(page.getByText('User Proxy Agent')).toBeVisible();
+    await expect(page.getByText('Claude Assistant')).toBeVisible();
+    await expect(page.getByText('Local Ollama')).toBeVisible();
+    await expect(page.getByText('MSTY Agent')).toBeVisible();
+    await expect(page.getByText('Jules Coder')).toBeVisible();
+    await expect(page.getByText('Copilot Async Coder')).toBeVisible();
+    await expect(page.getByText('Custom Agent')).toBeVisible();
+    await expect(page.getByText('User Proxy Agent')).toBeVisible();
   });
 
   test('canvas is interactive', async ({ page }) => {
@@ -70,16 +70,16 @@ test.describe('SquadAID UI/UX Tests', () => {
   });
 
   test('drag and drop functionality', async ({ page }) => {
-  const claudeAgent = page.getByText('Claude Assistant');
+    const claudeAgent = page.getByText('Claude Assistant');
     const canvas = page.getByLabel('Workflow canvas');
     
     // Test drag and drop (simulate)
     await claudeAgent.hover();
     await expect(claudeAgent).toBeVisible();
     
-  // Verify the agent item is available for dragging
-  const draggableAgent = page.locator('[aria-label="Agent palette"] [draggable="true"]', { hasText: 'Claude Assistant' });
-  await expect(draggableAgent).toBeVisible();
+    // Verify the agent item is available for dragging
+    const draggableAgent = page.locator('[aria-label="Agent library"] [draggable="true"]', { hasText: 'Claude Assistant' });
+    await expect(draggableAgent).toBeVisible();
   });
 
   test('responsive design on mobile', async ({ page }) => {
@@ -87,8 +87,8 @@ test.describe('SquadAID UI/UX Tests', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     
     // Should still be functional on mobile
-  await expect(page.locator('nav[aria-label="Main navigation"]')).toBeVisible();
-  await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    await expect(page.locator('nav[aria-label="Main navigation"]')).toBeVisible();
+    await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
   });
 
   test('accessibility features', async ({ page }) => {

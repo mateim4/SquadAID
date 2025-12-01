@@ -18,7 +18,7 @@ test.describe('Role System Tests', () => {
 
   test('role library panel is visible in palette', async ({ page }) => {
     // The palette should contain the role library
-    const palette = page.locator('[aria-label="Agent palette"]');
+    const palette = page.locator('[aria-label="Agent library"]');
     await expect(palette).toBeVisible();
     
     // Check for role-related UI elements
@@ -42,14 +42,14 @@ test.describe('Role System Tests', () => {
     ];
     
     // At least one role should be visible in the palette/role library
-    const palette = page.locator('[aria-label="Agent palette"]');
+    const palette = page.locator('[aria-label="Agent library"]');
     await expect(palette).toBeVisible();
   });
 
   test('role details display correctly', async ({ page }) => {
     // Roles should show name, icon, and description
     // This tests the RoleCard component rendering
-    const palette = page.locator('[aria-label="Agent palette"]');
+    const palette = page.locator('[aria-label="Agent library"]');
     await expect(palette).toBeVisible();
   });
 });
@@ -62,7 +62,7 @@ test.describe('Enhanced Agent Node Tests', () => {
 
   test('agent palette shows enhanced agents', async ({ page }) => {
     // Check that the palette includes draggable agents
-    const palette = page.locator('[aria-label="Agent palette"]');
+    const palette = page.locator('[aria-label="Agent library"]');
     await expect(palette).toBeVisible();
     
     // Should have multiple agent types
@@ -71,7 +71,7 @@ test.describe('Enhanced Agent Node Tests', () => {
   });
 
   test('can drag agent to canvas', async ({ page }) => {
-    const palette = page.locator('[aria-label="Agent palette"]');
+    const palette = page.locator('[aria-label="Agent library"]');
     const canvas = page.locator('[aria-label="Workflow canvas"]');
     
     await expect(palette).toBeVisible();
@@ -239,6 +239,118 @@ test.describe('Navigation and Page Routing Tests', () => {
   });
 });
 
+test.describe('Project Management Tests', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/#/projects');
+    // Wait for the Projects page to load
+    await expect(page.locator('nav[aria-label="Main navigation"]')).toBeVisible();
+  });
+
+  test('Add Project button is visible and clickable', async ({ page }) => {
+    // Find the Add Project button in the sidebar
+    const addProjectBtn = page.getByRole('button', { name: /Add Project/i });
+    await expect(addProjectBtn).toBeVisible();
+    
+    // Click the button to open the dialog
+    await addProjectBtn.click();
+    
+    // Verify the Create Project dialog opens
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByText('Create New Project')).toBeVisible();
+  });
+
+  test('Create Project dialog has all required fields', async ({ page }) => {
+    // Open the dialog
+    const addProjectBtn = page.getByRole('button', { name: /Add Project/i });
+    await addProjectBtn.click();
+    
+    // Verify dialog is open
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    
+    // Check for project name input
+    await expect(page.getByLabel(/Project Name/i)).toBeVisible();
+    
+    // Check for slug input
+    await expect(page.getByLabel(/Slug/i)).toBeVisible();
+    
+    // Check for project type options
+    await expect(page.getByText(/Local only/i)).toBeVisible();
+    await expect(page.getByText(/Hybrid/i)).toBeVisible();
+    await expect(page.getByText(/GitHub only/i)).toBeVisible();
+    
+    // Check for action buttons within the dialog
+    await expect(dialog.getByRole('button', { name: /Cancel/i })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Create Project/i })).toBeVisible();
+  });
+
+  test('Create Project button is disabled when name is empty', async ({ page }) => {
+    // Open the dialog
+    const addProjectBtn = page.getByRole('button', { name: /Add Project/i });
+    await addProjectBtn.click();
+    
+    // Verify dialog is open
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    
+    // Create Project button should be disabled initially (within dialog)
+    const createBtn = dialog.getByRole('button', { name: /Create Project/i });
+    await expect(createBtn).toBeDisabled();
+  });
+
+  test('Project name auto-generates slug', async ({ page }) => {
+    // Open the dialog
+    const addProjectBtn = page.getByRole('button', { name: /Add Project/i });
+    await addProjectBtn.click();
+    
+    // Verify dialog is open
+    await expect(page.getByRole('dialog')).toBeVisible();
+    
+    // Type a project name
+    const nameInput = page.getByLabel(/Project Name/i);
+    await nameInput.fill('Test Project Name');
+    
+    // Verify the slug is auto-generated
+    const slugInput = page.getByLabel(/Slug/i);
+    await expect(slugInput).toHaveValue('test-project-name');
+  });
+
+  test('Cancel button closes dialog', async ({ page }) => {
+    // Open the dialog
+    const addProjectBtn = page.getByRole('button', { name: /Add Project/i });
+    await addProjectBtn.click();
+    
+    // Verify dialog is open
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    
+    // Click cancel
+    const cancelBtn = dialog.getByRole('button', { name: /Cancel/i });
+    await cancelBtn.click();
+    
+    // Verify dialog is closed
+    await expect(page.getByRole('dialog')).not.toBeVisible();
+  });
+
+  test('GitHub repo field shows when hybrid or github mode selected', async ({ page }) => {
+    // Open the dialog
+    const addProjectBtn = page.getByRole('button', { name: /Add Project/i });
+    await addProjectBtn.click();
+    
+    // Verify dialog is open
+    await expect(page.getByRole('dialog')).toBeVisible();
+    
+    // By default (Local), repo field should not be visible
+    await expect(page.getByLabel(/GitHub Repository/i)).not.toBeVisible();
+    
+    // Select Hybrid mode
+    await page.getByText(/Hybrid/i).click();
+    
+    // Now repo field should be visible
+    await expect(page.getByLabel(/GitHub Repository/i)).toBeVisible();
+  });
+});
+
 test.describe('State Persistence Tests', () => {
   test('theme preference persists across reload', async ({ page }) => {
     await page.goto('/');
@@ -352,7 +464,7 @@ test.describe('Accessibility Tests', () => {
     
     // Check key ARIA labels
     await expect(page.locator('[aria-label="Main navigation"]')).toBeVisible();
-    await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
     await expect(page.locator('[aria-label="Workflow canvas"]')).toBeVisible();
   });
 
@@ -415,7 +527,7 @@ test.describe('Responsive Design Tests', () => {
     await page.goto('/');
     
     await expect(page.locator('nav[aria-label="Main navigation"]')).toBeVisible();
-    await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
   });
 
   test('tablet viewport renders correctly', async ({ page }) => {
@@ -432,6 +544,6 @@ test.describe('Responsive Design Tests', () => {
     
     await expect(page.locator('nav[aria-label="Main navigation"]')).toBeVisible();
     await expect(page.locator('[aria-label="Workflow canvas"]')).toBeVisible();
-    await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
   });
 });
