@@ -747,6 +747,7 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
                   value={createName} 
                   onChange={(_, d) => { 
                     setCreateName(d.value);
+                    // Auto-generate slug from name
                     setCreateSlug(sanitizeSlug(d.value));
                   }} 
                   placeholder="My Project" 
@@ -800,16 +801,19 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
               appearance="primary" 
               disabled={!createName.trim() || !createSlug.trim()}
               onClick={async () => {
+                const trimmedName = createName.trim();
+                const trimmedSlug = createSlug.trim();
+                const repoValue = createType !== 'local' ? (createRepo || undefined) : undefined;
                 try {
                   setCreateError('');
-                  await upsertProject(createSlug, {
-                    name: createName,
+                  await upsertProject(trimmedSlug, {
+                    name: trimmedName,
                     mode: createType,
-                    repo: (createType !== 'local' && createRepo) ? createRepo : undefined,
+                    repo: repoValue,
                   });
                   // Update default_branch separately if needed
                   if (createBranch) {
-                    await updateProject(createSlug, { default_branch: createBranch });
+                    await updateProject(trimmedSlug, { default_branch: createBranch });
                   }
                   setIsCreateOpen(false);
                   setCreateName('');
@@ -817,7 +821,7 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
                   setCreateRepo('');
                   setCreateBranch('');
                   await refreshProjectLists();
-                  setActiveSlug(createSlug);
+                  setActiveSlug(trimmedSlug);
                   setView('board');
                 } catch (e: any) {
                   setCreateError(e?.message || 'Failed to create project');
