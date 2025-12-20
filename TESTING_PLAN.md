@@ -2,7 +2,96 @@
 
 **Goal:** This document provides a comprehensive set of tests to ensure all core features of the Agent Orchestrator Studio are functioning correctly. It should be used for regression testing after making any significant changes.
 
+## Automated Test Coverage
+
+### Unit Tests (Vitest)
+Run with: `npm run test:unit`
+
+#### Components
+- **Palette Component** (`src/components/__tests__/Palette.test.tsx`)
+  - Renders with proper ARIA labels
+  - Shows agent and role tabs
+  - Draggable items work correctly
+  - Loading states display properly
+  - Keyboard navigation support
+
+- **AssistantAgentNode Component** (`src/components/__tests__/AssistantAgentNode.test.tsx`)
+  - Renders name and instruction prompt fields
+
+- **ConditionalEdge Component** (`src/components/__tests__/ConditionalEdge.test.tsx`)
+  - Allows editing conditions
+  - Persists changes via updateEdgeData
+
+#### Hooks
+- **useMediaQuery** (`src/hooks/__tests__/useMediaQuery.test.ts`)
+  - Returns correct values based on media queries
+  - Registers and cleans up event listeners
+  - Handles different query types
+
+#### Stores
+- **ProjectStore** (`src/store/__tests__/projectStore.test.ts`)
+  - Initializes with undefined values
+  - Sets and updates project info
+  - Clears project info
+  - Handles different project modes
+  - Manages repo information
+
+### E2E Tests (Playwright)
+Run with: `npm run test:e2e`
+
+#### Projects Page Tests (`tests/projects-page.spec.ts`)
+- **Create Project Dialog**
+  - Opens when Add Project button is clicked
+  - Closes when Cancel is clicked
+  - Shows validation errors for empty fields
+  - Auto-generates slug from project name
+  - Allows manual slug editing with sanitization
+  - Selects project type with radio buttons
+  - Shows GitHub auth section for hybrid/GitHub projects
+  - Enables Create button when required fields filled
+  - Has accessible form labels and descriptions
+  
+- **Project List**
+  - Displays projects sidebar
+  - Shows Add Project button
+
+#### UI/UX Tests (`tests/ui-ux.spec.ts`)
+- Application loads with correct title
+- Navigation sidebar works properly
+- Theme toggle functions
+- Agent palette is visible and functional
+- Canvas is interactive
+- Drag and drop functionality
+- Responsive design on mobile
+- Accessibility features
+- Visual consistency and modern design
+- Performance and loading states
+
+#### Data Model Enhancement Tests (`tests/data-model-enhancement.spec.ts`)
+- Role system tests
+- Enhanced agent node tests
+- Relationship edge tests
+- Execution dashboard tests
+- Navigation and page routing tests
+- State persistence tests
+- Provider configuration tests
+- Error handling tests
+- Accessibility tests
+- Performance tests
+- Responsive design tests
+
+#### Fluent Design Validation Tests (`tests/fluent-design-validation.spec.ts`)
+- Captures current design state
+- Tests drag and drop interactions
+- Analyzes color usage against Fluent 2 DS palette
+- Validates acrylic materials
+- Validates depth and layering
+
 ---
+
+## Manual Testing Checklist
+
+The following tests should be performed manually to ensure full coverage:
 
 ### Test Case 1: Application Integrity
 
