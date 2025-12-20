@@ -45,16 +45,21 @@ test.describe('SquadAID UI/UX Tests', () => {
 
   test('agent palette is visible and functional', async ({ page }) => {
     // Should show the agent palette
-  await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
     
-    // Should show all agent types
-  await expect(page.getByText('Claude Assistant')).toBeVisible();
-  await expect(page.getByText('Local Ollama')).toBeVisible();
-  await expect(page.getByText('MSTY Agent')).toBeVisible();
-  await expect(page.getByText('Jules Coder')).toBeVisible();
-  await expect(page.getByText('Copilot Async Coder')).toBeVisible();
-  await expect(page.getByText('Custom Agent')).toBeVisible();
-  await expect(page.getByText('User Proxy Agent')).toBeVisible();
+    // Palette should have tabs
+    await expect(page.getByLabel('Palette tabs')).toBeVisible();
+    
+    // Check for Agents tab
+    await expect(page.getByRole('tab', { name: /Agents tab/i })).toBeVisible();
+    
+    // Check for Roles tab
+    await expect(page.getByRole('tab', { name: /Roles tab/i })).toBeVisible();
+    
+    // By default, should show agent types
+    await expect(page.getByText('Enhanced Agent')).toBeVisible();
+    await expect(page.getByText('Assistant Agent')).toBeVisible();
+    await expect(page.getByText('User Proxy')).toBeVisible();
   });
 
   test('canvas is interactive', async ({ page }) => {
@@ -70,16 +75,16 @@ test.describe('SquadAID UI/UX Tests', () => {
   });
 
   test('drag and drop functionality', async ({ page }) => {
-  const claudeAgent = page.getByText('Claude Assistant');
+    const palette = page.locator('[aria-label="Agent palette"]');
     const canvas = page.getByLabel('Workflow canvas');
     
     // Test drag and drop (simulate)
-    await claudeAgent.hover();
-    await expect(claudeAgent).toBeVisible();
+    await palette.hover();
+    await expect(palette).toBeVisible();
     
-  // Verify the agent item is available for dragging
-  const draggableAgent = page.locator('[aria-label="Agent palette"] [draggable="true"]', { hasText: 'Claude Assistant' });
-  await expect(draggableAgent).toBeVisible();
+    // Verify the agent items are available for dragging
+    const agentItems = palette.locator('[role="button"][draggable="true"]');
+    await expect(agentItems.first()).toBeVisible();
   });
 
   test('responsive design on mobile', async ({ page }) => {
@@ -102,9 +107,10 @@ test.describe('SquadAID UI/UX Tests', () => {
 
   test('visual consistency and modern design', async ({ page }) => {
     // Smoke-hover one card to ensure hover feedback present
-    const claudeAgent = page.getByText('Claude Assistant');
-    await claudeAgent.hover();
-    await expect(claudeAgent).toBeVisible();
+    const palette = page.locator('[aria-label="Agent palette"]');
+    const firstAgent = palette.locator('[role="button"][draggable="true"]').first();
+    await firstAgent.hover();
+    await expect(firstAgent).toBeVisible();
   });
 
   test('performance and loading states', async ({ page }) => {

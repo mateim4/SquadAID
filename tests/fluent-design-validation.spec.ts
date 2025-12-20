@@ -87,15 +87,15 @@ test.describe('Fluent 2 Design System Validation', () => {
 
   test('should test drag and drop interactions with design analysis', async ({ page }) => {
     // Wait for the palette to be loaded
-    const palette = page.locator('.palette, [class*="palette"]');
+    const palette = page.locator('[aria-label="Agent palette"]');
     await expect(palette).toBeVisible();
     
-  // Find a known agent tile by text as a proxy for card visibility
-  const firstCard = page.getByText('Claude Assistant');
-  await expect(firstCard).toBeVisible();
+    // Find a draggable agent item
+    const firstCard = palette.locator('[role="button"][draggable="true"]').first();
+    await expect(firstCard).toBeVisible();
     
     // Get the canvas area
-  const canvas = page.locator('.react-flow, [class*="builder-page-container"]');
+    const canvas = page.locator('.react-flow, [class*="builder-page-container"]');
     await expect(canvas).toBeVisible();
     
     // Perform drag and drop
