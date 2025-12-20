@@ -270,6 +270,7 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
   }, [isCreateOpen]);
 
   // Load branches when createRepo changes
+  // Note: createBranch is intentionally not in deps - we only want to reload branches when repo changes
   useEffect(() => {
     if (!createRepo || !isCreateOpen) return;
     (async () => {
@@ -284,6 +285,7 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
         }
       } catch {}
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createRepo, isCreateOpen]);
 
   async function refreshTasks() {
@@ -957,7 +959,12 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
               </Button>
               <Button
                 appearance="primary"
-                disabled={!createName || !createSlug || ((createType === 'hybrid' || createType === 'github') && (!ghAuthed || !createRepo))}
+                disabled={
+                  !createName ||
+                  !createSlug ||
+                  ((createType === 'hybrid' || createType === 'github') &&
+                    (!ghAuthed || !createRepo))
+                }
                 onClick={async () => {
                   try {
                     setCreateError('');
