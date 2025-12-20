@@ -735,7 +735,7 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
   // Create Project Dialog
   const createProjectDialog = (
     <Dialog open={isCreateOpen} onOpenChange={(_, data) => setIsCreateOpen(data.open)}>
-      <DialogSurface className={styles.frostedDialog}>
+      <DialogSurface className={styles.frostedCard}>
         <DialogBody>
           <DialogTitle>Create New Project</DialogTitle>
           <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 16 }}>
@@ -806,12 +806,11 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
                     return;
                   }
                   // Create the project
-                  await upsertProject({
-                    slug: createSlug,
+                  await upsertProject(createSlug, {
                     name: createName,
                     description: '',
                     mode: createType,
-                    repo: createRepo || null,
+                    repo: createRepo || undefined,
                   });
                   // Refresh projects list
                   const res = await listProjects();
