@@ -254,13 +254,37 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
       if (ok) {
         try {
           const u = await getUser();
+          setOwnerLogin(u.login);
           setCreateGhMsg(`Connected as ${u.login}`);
+          const [repos, orgs] = await Promise.all([
+            listViewerRepos().catch(() => []),
+            listUserOrgs().catch(() => []),
+          ]);
+          setRepoOptions(repos || []);
+          setOrgs(orgs || []);
         } catch {}
       } else {
         setCreateGhMsg('');
       }
     })();
   }, [isCreateOpen]);
+
+  // Load branches when createRepo changes
+  useEffect(() => {
+    if (!createRepo || !isCreateOpen) return;
+    (async () => {
+      try {
+        const bs = await listBranches(createRepo).catch(() => []);
+        const names = Array.isArray(bs) ? bs.map((b: any) => b.name) : [];
+        setBranchOptions(names);
+        if (!createBranch && names.length > 0) {
+          const info = await getRepo(createRepo).catch(() => null);
+          const def = (info as any)?.default_branch || names[0] || 'main';
+          setCreateBranch(def);
+        }
+      } catch {}
+    })();
+  }, [createRepo, isCreateOpen]);
 
   async function refreshTasks() {
     if (!project) return;
@@ -751,10 +775,347 @@ export default function ProjectsPage({ render }: ProjectsPageProps) {
 
   // Fallback rendering for non-grid layouts
   return (
-    <div style={{ display: 'flex', width: '100%', height: '100%' }}>
-      {leftSidebar}
-      {content}
-      {rightSidebar}
-    </div>
+    <>
+      <div style={{ display: 'flex', width: '100%', height: '100%' }}>
+        {leftSidebar}
+        {content}
+        {rightSidebar}
+      </div>
+
+      {/* Create Project Dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={(_, data) => setIsCreateOpen(data.open)}>
+        <DialogSurface aria-describedby="create-project-description" style={{ maxWidth: 600 }}>
+          <DialogBody>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogContent id="create-project-description">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <Label required>Project Name</Label>
+                  <Input
+                    aria-label="Project name"
+                    value={createName}
+                    onChange={(e, d) => {
+                      setCreateName(d.value);
+                      if (!createSlug) {
+                        setCreateSlug(sanitizeSlug(d.value));
+                      }
+                    }}
+                    placeholder="My Awesome Project"
+                  />
+                </div>
+                <div>
+                  <Label required>Project Slug</Label>
+                  <Input
+                    aria-label="Project slug"
+                    value={createSlug}
+                    onChange={(e, d) => setCreateSlug(sanitizeSlug(d.value))}
+                    placeholder="my-awesome-project"
+                  />
+                  <Caption1 style={{ color: tokens.colorNeutralForeground2 }}>
+                    URL-friendly identifier (lowercase, hyphens only)
+                  </Caption1>
+                </div>
+                <Divider />
+                <div>
+                  <Label>Project Type</Label>
+                  <RadioGroup
+                    aria-label="Project type"
+                    value={createType}
+                    onChange={(e, data) => setCreateType(data.value as any)}
+                  >
+                    <Radio value="local" label="Local only – tasks stored locally" />
+                    <Radio value="hybrid" label="Hybrid – local tasks synced with GitHub issues" />
+                    <Radio value="github" label="GitHub only – tasks are GitHub issues" />
+                  </RadioGroup>
+                </div>
+                {(createType === 'hybrid' || createType === 'github') && (
+                  <>
+                    <Divider />
+                    {!ghAuthed ? (
+                      <div style={{ padding: 12, background: tokens.colorNeutralBackground3, borderRadius: 8 }}>
+                        <Body1 style={{ marginBottom: 8 }}>
+                          <b>GitHub authentication required</b>
+                        </Body1>
+                        <Caption1 style={{ color: tokens.colorNeutralForeground2, marginBottom: 8, display: 'block' }}>
+                          {createGhMsg || 'Connect your GitHub account to use GitHub features.'}
+                        </Caption1>
+                        <GitHubSignIn
+                          onAuthStarted={() => setIsAuthInProgress(true)}
+                          onAuthSuccess={async (user: any) => {
+                            setIsAuthInProgress(false);
+                            const ok = await hasGitHubToken().catch(() => false);
+                            setGhAuthed(ok);
+                            if (ok) {
+                              try {
+                                setOwnerLogin(user.login);
+                                setCreateGhMsg(`Connected as ${user.login}`);
+                                const [repos, orgs] = await Promise.all([
+                                  listViewerRepos().catch(() => []),
+                                  listUserOrgs().catch(() => []),
+                                ]);
+                                setRepoOptions(repos || []);
+                                setOrgs(orgs || []);
+                              } catch {}
+                            }
+                          }}
+                          onAuthFailure={() => {
+                            setIsAuthInProgress(false);
+                            setCreateGhMsg('Authentication failed. Please try again.');
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <Label>Repository (owner/name)</Label>
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <Input
+                              aria-label="Repository"
+                              value={createRepo}
+                              onChange={(e, d) => {
+                                setCreateRepo(d.value);
+                                setRepoQuery(d.value);
+                              }}
+                              placeholder="owner/repo"
+                              style={{ flex: 1 }}
+                            />
+                            <Button
+                              aria-label="Create new repository"
+                              size="small"
+                              onClick={() => {
+                                setIsCreateRepoOpen(true);
+                                setNewRepoName('');
+                                setNewRepoDesc('');
+                                setNewRepoPrivate(true);
+                                setNewRepoInit(true);
+                                setCreateRepoError('');
+                              }}
+                            >
+                              Create Repo
+                            </Button>
+                          </div>
+                          {repoQuery && repoOptions.length > 0 && (
+                            <div style={{ marginTop: 4, maxHeight: 150, overflowY: 'auto', border: `1px solid ${tokens.colorNeutralStroke2}`, borderRadius: 4 }}>
+                              {repoOptions
+                                .filter((r: any) => r.full_name.toLowerCase().includes(repoQuery.toLowerCase()))
+                                .slice(0, 5)
+                                .map((r: any) => (
+                                  <div
+                                    key={r.id}
+                                    style={{ padding: '6px 8px', cursor: 'pointer', borderBottom: `1px solid ${tokens.colorNeutralStroke3}` }}
+                                    onClick={() => {
+                                      setCreateRepo(r.full_name);
+                                      setRepoQuery('');
+                                    }}
+                                  >
+                                    <Caption1>{r.full_name}</Caption1>
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                          <Caption1 style={{ color: tokens.colorNeutralForeground2 }}>
+                            {createGhMsg}
+                          </Caption1>
+                        </div>
+                        {createRepo && (
+                          <div>
+                            <Label>Default Branch</Label>
+                            <Select
+                              aria-label="Default branch"
+                              value={createBranch}
+                              onChange={(e) => setCreateBranch((e.target as HTMLSelectElement).value)}
+                            >
+                              <option value="">Select a branch...</option>
+                              {branchOptions.map((b) => (
+                                <option key={b} value={b}>
+                                  {b}
+                                </option>
+                              ))}
+                            </Select>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+                {createError && (
+                  <div style={{ padding: 8, background: tokens.colorPaletteRedBackground1, borderRadius: 4 }}>
+                    <Caption1 style={{ color: tokens.colorPaletteRedForeground1 }}>{createError}</Caption1>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                appearance="secondary"
+                onClick={() => {
+                  setIsCreateOpen(false);
+                  setCreateError('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                appearance="primary"
+                disabled={!createName || !createSlug || ((createType === 'hybrid' || createType === 'github') && (!ghAuthed || !createRepo))}
+                onClick={async () => {
+                  try {
+                    setCreateError('');
+                    const payload: any = {
+                      name: createName,
+                      mode: createType,
+                    };
+                    if (createType === 'hybrid' || createType === 'github') {
+                      payload.repo = createRepo;
+                      if (createBranch) payload.default_branch = createBranch;
+                    }
+                    await upsertProject(createSlug, payload);
+                    setIsCreateOpen(false);
+                    setCreateName('');
+                    setCreateSlug('');
+                    setCreateRepo('');
+                    setCreateBranch('');
+                    setCreateType('local');
+                    await refreshProjectLists();
+                  } catch (e: any) {
+                    setCreateError(e?.message || String(e));
+                  }
+                }}
+              >
+                Create Project
+              </Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
+
+      {/* Create Repository Dialog */}
+      <Dialog open={isCreateRepoOpen} onOpenChange={(_, data) => setIsCreateRepoOpen(data.open)}>
+        <DialogSurface aria-describedby="create-repo-description" style={{ maxWidth: 500 }}>
+          <DialogBody>
+            <DialogTitle>Create GitHub Repository</DialogTitle>
+            <DialogContent id="create-repo-description">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <Label>Owner</Label>
+                  <RadioGroup
+                    aria-label="Repository owner type"
+                    value={ownerChoice}
+                    onChange={(e, data) => setOwnerChoice(data.value as any)}
+                  >
+                    <Radio value="user" label={`User (${ownerLogin})`} />
+                    <Radio value="org" label="Organization" disabled={orgs.length === 0} />
+                  </RadioGroup>
+                </div>
+                {ownerChoice === 'org' && (
+                  <div>
+                    <Label>Select Organization</Label>
+                    <Select
+                      aria-label="Organization"
+                      value={selectedOrg}
+                      onChange={(e) => setSelectedOrg((e.target as HTMLSelectElement).value)}
+                    >
+                      <option value="">Choose an org...</option>
+                      {orgs.map((org: any) => (
+                        <option key={org.login} value={org.login}>
+                          {org.login}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                )}
+                <div>
+                  <Label required>Repository Name</Label>
+                  <Input
+                    aria-label="Repository name"
+                    value={newRepoName}
+                    onChange={(e, d) => setNewRepoName(d.value)}
+                    placeholder="my-project"
+                  />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Textarea
+                    aria-label="Repository description"
+                    value={newRepoDesc}
+                    onChange={(e, d) => setNewRepoDesc(d.value)}
+                    placeholder="Optional description"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Checkbox
+                    checked={newRepoPrivate}
+                    onChange={(e, d) => setNewRepoPrivate(d.checked === true)}
+                    label="Private repository"
+                  />
+                </div>
+                <div>
+                  <Checkbox
+                    checked={newRepoInit}
+                    onChange={(e, d) => setNewRepoInit(d.checked === true)}
+                    label="Initialize with README"
+                  />
+                </div>
+                {createRepoError && (
+                  <div style={{ padding: 8, background: tokens.colorPaletteRedBackground1, borderRadius: 4 }}>
+                    <Caption1 style={{ color: tokens.colorPaletteRedForeground1 }}>{createRepoError}</Caption1>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                appearance="secondary"
+                onClick={() => {
+                  setIsCreateRepoOpen(false);
+                  setCreateRepoError('');
+                }}
+                disabled={createRepoBusy}
+              >
+                Cancel
+              </Button>
+              <Button
+                appearance="primary"
+                disabled={!newRepoName || createRepoBusy || (ownerChoice === 'org' && !selectedOrg)}
+                onClick={async () => {
+                  try {
+                    setCreateRepoBusy(true);
+                    setCreateRepoError('');
+                    const payload: any = {
+                      name: newRepoName,
+                      description: newRepoDesc,
+                      private: newRepoPrivate,
+                      auto_init: newRepoInit,
+                    };
+                    let result: any;
+                    if (ownerChoice === 'org' && selectedOrg) {
+                      result = await createRepoForOrg(selectedOrg, payload);
+                    } else {
+                      result = await createRepoForUser(payload);
+                    }
+                    setCreateRepo(result.full_name);
+                    setIsCreateRepoOpen(false);
+                    // Fetch branches after repo creation
+                    try {
+                      const bs = await listBranches(result.full_name).catch(() => []);
+                      const names = Array.isArray(bs) ? bs.map((b: any) => b.name) : [];
+                      setBranchOptions(names);
+                      if (result.default_branch) setCreateBranch(result.default_branch);
+                    } catch {}
+                  } catch (e: any) {
+                    setCreateRepoError(e?.message || String(e));
+                  } finally {
+                    setCreateRepoBusy(false);
+                  }
+                }}
+              >
+                {createRepoBusy ? 'Creating...' : 'Create Repository'}
+              </Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
+    </>
   );
 }

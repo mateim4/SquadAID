@@ -237,7 +237,7 @@ const Palette: React.FC<PaletteProps> = ({ onRoleDragStart }) => {
   };
 
   return (
-    <aside className={styles.palette}>
+    <aside className={styles.palette} aria-label="Agent palette">
       {/* Header with Tabs */}
       <div className={styles.header}>
         <TabList
@@ -245,17 +245,19 @@ const Palette: React.FC<PaletteProps> = ({ onRoleDragStart }) => {
           selectedValue={selectedTab}
           onTabSelect={(_, data) => setSelectedTab(data.value as string)}
           size="small"
+          aria-label="Palette tabs"
         >
-          <Tab value="agents" icon={<Bot24Regular />}>
+          <Tab value="agents" icon={<Bot24Regular />} aria-label="Agents tab">
             Agents
           </Tab>
-          <Tab value="roles" icon={<People24Regular />}>
+          <Tab value="roles" icon={<People24Regular />} aria-label="Roles tab">
             Roles
             <Badge 
               size="small" 
               appearance="filled" 
               color="informative"
               style={{ marginLeft: tokens.spacingHorizontalXS }}
+              aria-label={`${roles.length} roles available`}
             >
               {roles.length}
             </Badge>
@@ -264,7 +266,7 @@ const Palette: React.FC<PaletteProps> = ({ onRoleDragStart }) => {
       </div>
 
       {/* Content */}
-      <div className={styles.content}>
+      <div className={styles.content} role="region" aria-label={selectedTab === 'agents' ? 'Agent list' : 'Role list'}>
         {selectedTab === 'agents' && (
           <>
             <Text className={styles.sectionTitle}>Drag to Canvas</Text>
@@ -281,10 +283,20 @@ const Palette: React.FC<PaletteProps> = ({ onRoleDragStart }) => {
                     className={styles.paletteItem}
                     onDragStart={(event) => onAgentDragStart(event, node.type)}
                     draggable
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${node.name} - ${node.description}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        // Could trigger drag start or show more info
+                      }
+                    }}
                   >
                     <div
                       className={styles.paletteItemIcon}
                       style={{ backgroundColor: `${node.color}20` }}
+                      aria-hidden="true"
                     >
                       <IconComponent style={{ color: node.color }} />
                     </div>
@@ -308,12 +320,12 @@ const Palette: React.FC<PaletteProps> = ({ onRoleDragStart }) => {
             </Text>
             
             {isLoading ? (
-              <div className={styles.emptyState}>
+              <div className={styles.emptyState} role="status" aria-live="polite" aria-label="Loading roles">
                 <Text>Loading roles...</Text>
               </div>
             ) : roles.length === 0 ? (
-              <div className={styles.emptyState}>
-                <People24Regular style={{ fontSize: '32px', marginBottom: tokens.spacingVerticalS }} />
+              <div className={styles.emptyState} role="status" aria-label="No roles available">
+                <People24Regular style={{ fontSize: '32px', marginBottom: tokens.spacingVerticalS }} aria-hidden="true" />
                 <Text>No roles available</Text>
               </div>
             ) : (
@@ -338,12 +350,22 @@ const Palette: React.FC<PaletteProps> = ({ onRoleDragStart }) => {
                       className={styles.roleItem}
                       onDragStart={(event) => onRoleDrag(event, role)}
                       draggable
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${role.name} - Authority level ${role.attributes.authorityLevel} - ${role.isBuiltIn ? 'Built-in' : 'Custom'} role`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          // Could trigger drag start or show more info
+                        }
+                      }}
                     >
                       <div
                         className={styles.roleIcon}
                         style={{
                           backgroundColor: role.color ? `${role.color}20` : tokens.colorBrandBackground2,
                         }}
+                        aria-hidden="true"
                       >
                         <IconComponent
                           style={{
@@ -359,10 +381,11 @@ const Palette: React.FC<PaletteProps> = ({ onRoleDragStart }) => {
                             size="tiny"
                             appearance="tint"
                             color={role.isBuiltIn ? 'brand' : 'subtle'}
+                            aria-label={role.isBuiltIn ? 'Built-in role' : 'Custom role'}
                           >
                             {role.isBuiltIn ? 'Built-in' : 'Custom'}
                           </Badge>
-                          <Badge size="tiny" appearance="outline">
+                          <Badge size="tiny" appearance="outline" aria-label={`Authority level ${role.attributes.authorityLevel}`}>
                             L{role.attributes.authorityLevel}
                           </Badge>
                         </div>
