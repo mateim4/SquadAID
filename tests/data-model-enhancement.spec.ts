@@ -17,8 +17,8 @@ test.describe('Role System Tests', () => {
   });
 
   test('role library panel is visible in palette', async ({ page }) => {
-    // The palette should contain the role library
-    const palette = page.locator('[aria-label="Agent palette"]');
+    // The agent library should be visible on the Team Builder page
+    const palette = page.locator('[aria-label="Agent library"]');
     await expect(palette).toBeVisible();
     
     // Check for role-related UI elements
@@ -42,14 +42,14 @@ test.describe('Role System Tests', () => {
     ];
     
     // At least one role should be visible in the palette/role library
-    const palette = page.locator('[aria-label="Agent palette"]');
+    const palette = page.locator('[aria-label="Agent library"]');
     await expect(palette).toBeVisible();
   });
 
   test('role details display correctly', async ({ page }) => {
     // Roles should show name, icon, and description
     // This tests the RoleCard component rendering
-    const palette = page.locator('[aria-label="Agent palette"]');
+    const palette = page.locator('[aria-label="Agent library"]');
     await expect(palette).toBeVisible();
   });
 });
@@ -61,8 +61,8 @@ test.describe('Enhanced Agent Node Tests', () => {
   });
 
   test('agent palette shows enhanced agents', async ({ page }) => {
-    // Check that the palette includes draggable agents
-    const palette = page.locator('[aria-label="Agent palette"]');
+    // Check that the agent library includes draggable agents
+    const palette = page.locator('[aria-label="Agent library"]');
     await expect(palette).toBeVisible();
     
     // Should have multiple agent types
@@ -71,7 +71,7 @@ test.describe('Enhanced Agent Node Tests', () => {
   });
 
   test('can drag agent to canvas', async ({ page }) => {
-    const palette = page.locator('[aria-label="Agent palette"]');
+    const palette = page.locator('[aria-label="Agent library"]');
     const canvas = page.locator('[aria-label="Workflow canvas"]');
     
     await expect(palette).toBeVisible();
@@ -352,7 +352,7 @@ test.describe('Accessibility Tests', () => {
     
     // Check key ARIA labels
     await expect(page.locator('[aria-label="Main navigation"]')).toBeVisible();
-    await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
     await expect(page.locator('[aria-label="Workflow canvas"]')).toBeVisible();
   });
 
@@ -415,7 +415,7 @@ test.describe('Responsive Design Tests', () => {
     await page.goto('/');
     
     await expect(page.locator('nav[aria-label="Main navigation"]')).toBeVisible();
-    await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
   });
 
   test('tablet viewport renders correctly', async ({ page }) => {
@@ -432,6 +432,6 @@ test.describe('Responsive Design Tests', () => {
     
     await expect(page.locator('nav[aria-label="Main navigation"]')).toBeVisible();
     await expect(page.locator('[aria-label="Workflow canvas"]')).toBeVisible();
-    await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
   });
 });

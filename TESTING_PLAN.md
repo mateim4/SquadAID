@@ -4,6 +4,45 @@
 
 ---
 
+## Automated Test Results (Latest Run)
+
+### Summary
+| Test Type | Passed | Failed | Pass Rate |
+|-----------|--------|--------|-----------|
+| Unit Tests (Vitest) | 121 | 0 | 100% |
+| E2E Tests (Playwright) | 101 | 12 | 89.4% |
+| **Total** | **222** | **12** | **94.9%** |
+
+### Failing E2E Tests (12)
+These tests fail due to selector mismatches with the current UI. They target selectors that don't match the actual component implementation:
+- `data-model-enhancement.spec.ts`: Role System Tests (3), Agent Node Tests (2), Accessibility (1), Responsive (2)
+- `ui-ux.spec.ts`: Agent palette (1), Drag/drop (1), Mobile responsive (1)
+- `comprehensive.spec.ts`: Save workflow validation (1)
+
+### Test Files Created
+- `tests/comprehensive.spec.ts` - Comprehensive E2E test suite covering all app functionality
+- `src/components/__tests__/ui-components.test.tsx` - Unit tests for UI components
+- `src/hooks/__tests__/hooks.test.ts` - Unit tests for custom React hooks
+- `src/store/__tests__/stores.test.ts` - Unit tests for Zustand stores
+- `src/services/__tests__/services.test.ts` - Unit tests for service layer
+
+### Running Tests
+```bash
+# Run all unit tests
+npm run test:unit
+
+# Run E2E tests
+npm run test:e2e
+
+# Run E2E tests with specific browser
+npx playwright test --project=chromium
+
+# Run unit tests in watch mode
+npm run test
+```
+
+---
+
 ### Test Case 1: Application Integrity
 
 **Goal:** Verify that the application starts and all UI components render correctly.

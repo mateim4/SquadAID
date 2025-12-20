@@ -44,8 +44,8 @@ test.describe('SquadAID UI/UX Tests', () => {
   });
 
   test('agent palette is visible and functional', async ({ page }) => {
-    // Should show the agent palette
-  await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+    // Should show the agent library (the palette component on Team Builder page)
+  await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
     
     // Should show all agent types
   await expect(page.getByText('Claude Assistant')).toBeVisible();
@@ -78,7 +78,7 @@ test.describe('SquadAID UI/UX Tests', () => {
     await expect(claudeAgent).toBeVisible();
     
   // Verify the agent item is available for dragging
-  const draggableAgent = page.locator('[aria-label="Agent palette"] [draggable="true"]', { hasText: 'Claude Assistant' });
+  const draggableAgent = page.locator('[aria-label="Agent library"] [draggable="true"]', { hasText: 'Claude Assistant' });
   await expect(draggableAgent).toBeVisible();
   });
 
@@ -88,7 +88,7 @@ test.describe('SquadAID UI/UX Tests', () => {
     
     // Should still be functional on mobile
   await expect(page.locator('nav[aria-label="Main navigation"]')).toBeVisible();
-  await expect(page.locator('[aria-label="Agent palette"]')).toBeVisible();
+  await expect(page.locator('[aria-label="Agent library"]')).toBeVisible();
   });
 
   test('accessibility features', async ({ page }) => {

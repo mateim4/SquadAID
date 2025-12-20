@@ -237,7 +237,7 @@ const Palette: React.FC<PaletteProps> = ({ onRoleDragStart }) => {
   };
 
   return (
-    <aside className={styles.palette}>
+    <aside className={styles.palette} aria-label="Agent palette">
       {/* Header with Tabs */}
       <div className={styles.header}>
         <TabList
