@@ -180,6 +180,13 @@ const agentNodes = [
     color: tokens.colorBrandBackground,
   },
   {
+    type: 'geminiAgent',
+    name: 'Gemini CLI Agent',
+    description: 'Run the local Gemini CLI (configurable model & flags)',
+    icon: Bot24Regular,
+    color: tokens.colorPaletteCyanBackground2,
+  },
+  {
     type: 'userProxyAgent',
     name: 'User Proxy',
     description: 'Human-in-the-loop terminal node',
