@@ -16,6 +16,7 @@ import useFlowStore, { FlowState } from '../store/flow';
 import AssistantAgentNode from '../components/nodes/AssistantAgentNode';
 import UserProxyAgentNode from '../components/nodes/UserProxyAgentNode';
 import EnhancedAgentNode from '../components/nodes/EnhancedAgentNode';
+import GeminiAgentNode from '../components/nodes/GeminiAgentNode';
 import RelationshipEdge from '../components/edges/RelationshipEdge';
 import { RelationshipConfigModal } from '../components/edges/RelationshipConfigModal';
 import { RelationshipEdge as RelationshipEdgeType } from '../types/relationship';
@@ -48,6 +49,7 @@ const BuilderPageContent = memo(() => {
       assistantAgent: AssistantAgentNode,
       userProxyAgent: UserProxyAgentNode,
       enhancedAgent: EnhancedAgentNode,
+      geminiAgent: GeminiAgentNode,
     }),
     []
   );
@@ -203,6 +205,15 @@ const BuilderPageContent = memo(() => {
         data = {
           name: 'New Agent',
           systemMessage: 'You are a helpful assistant.',
+        };
+        break;
+      case 'geminiAgent':
+        data = {
+          name: 'Gemini CLI Agent',
+          prompt: '',
+          model: 'gemini-1.5-pro',
+          flags: '',
+          output: '',
         };
         break;
       case 'userProxyAgent':
