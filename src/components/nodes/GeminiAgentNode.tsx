@@ -10,8 +10,8 @@ import {
   Text,
   Spinner,
   Tooltip,
-  IconButton,
 } from '@fluentui/react-components';
+import { IconButton } from '@fluentui/react-button';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { PlayIcon, SettingsIcon } from '@/components/icons';
 import { runGeminiPromptWithOptions } from '@/services/geminiBridge';

@@ -3,6 +3,13 @@ import { test, expect } from '@playwright/test';
 test.describe('Gemini node', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    // Ensure we're on the Team Builder page where canvas & agent library exist
+    const builderTab = page.getByRole('tab', { name: 'Team Builder' });
+    if (await builderTab.isVisible()) {
+      await builderTab.click();
+      // Wait for the agent library to be visible
+      await page.getByLabel('Agent library').waitFor({ state: 'visible' });
+    }
   });
 
   test('add Gemini node via Agent Library and configure', async ({ page }) => {
